@@ -29,4 +29,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=solarguard -Dsonar.projectKey=solarguard -Dsonar.coverage.exclusions=**/*Application.java,**/core/*.java,**/entity/*.java,**/repository/*.java,**/vo/*.java
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=solarguard -Dsonar.projectKey=solarguard -Dsonar.coverage.exclusions=**/*Application.java,**/core/**/*.java,**/entity/**/*.java,**/repository/**/*.java,**/vo/**/*.java
