@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <changeSet author="silentsoft" id="create_activated_licenses_0000">
+        <createTable tableName="activated_licenses">
+            <column name="license_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activated_licenses_pkey"/>
+            </column>
+            <column name="device_id" type="VARCHAR">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activated_licenses_pkey"/>
+            </column>
+            <column defaultValueComputed="${now}" name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="${now}" name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="activated_licenses_license_id_idx" tableName="activated_licenses">
+            <column name="license_id"/>
+        </createIndex>
+        <createIndex indexName="activated_licenses_device_id_idx" tableName="activated_licenses">
+            <column name="device_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="license_id" baseTableName="activated_licenses" constraintName="activated_licenses_license_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="licenses" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="device_id" baseTableName="activated_licenses" constraintName="activated_licenses_device_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="devices" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

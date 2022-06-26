@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <changeSet author="silentsoft" id="create_product_token_statistics_0000">
+        <createTable tableName="product_token_statistics">
+            <column name="product_token_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="product_token_statistics_pkey"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="product_token_statistics_pkey"/>
+            </column>
+            <column defaultValueNumeric="0" name="success_count" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="failure_count" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="${now}" name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="${now}" name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="product_token_statistics_product_token_id_idx" tableName="product_token_statistics">
+            <column name="product_token_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="product_token_id" baseTableName="product_token_statistics" constraintName="product_token_statistics_product_token_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="product_tokens" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

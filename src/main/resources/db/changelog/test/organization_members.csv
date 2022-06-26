@@ -1,0 +1,6 @@
+organization_id,user_id,role,created_by,updated_by
+100,1,STAFF,1,1
+100,2,MEMBER,1,1
+101,1,STAFF,1,1
+101,3,MEMBER,1,1
+101,4,MEMBER,1,1

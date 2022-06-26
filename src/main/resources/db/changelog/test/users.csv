@@ -1,0 +1,6 @@
+id,username,password,email,is_temporary_password,is_deleted,role,created_by,updated_by
+1,admin,$2a$10$ywofPZeoW.4V.224stugyOC0GwHjEGyJ9rEEJN8YRy3.qGogio.aO,admin@solarguard.io,false,false,ADMIN,1,1
+2,user,$2a$10$eWHIiSYuDjA4xcbNRBNXs.gMRTsWyPTK5MpZuczpbjJOD6IptrOZK,user@solarguard.io,false,false,USER,2,2
+3,test1,$2a$10$bdBwabw1T3KwI2YF6rYkXeu8TZEAGd7KROM31f08RWoaNcIfQK8lO,test1@solarguard.io,false,false,USER,3,3
+4,test2,$2a$10$0h0ZjR7d4HwcZx2WurRYEu/GqDV1.p3s94GAgaz8oEPYy3qf9VOG2,test2@solarguard.io,false,false,USER,4,4
+5,test3,$2a$10$9RmLgnQgLdTRLDelwlOZq.Mq8Zcw0x67aRyqOHZWHz5xvJ9x2K19i,test3@solarguard.io,false,false,USER,5,5

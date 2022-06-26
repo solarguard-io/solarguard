@@ -1,0 +1,30 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.5.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="now" value="now()" dbms="postgresql"/>
+    <property name="now" value="CURRENT_TIMESTAMP" dbms="h2"/>
+    <property name="now" value="CURRENT_TIMESTAMP" dbms="derby"/>
+
+    <!-- Create -->
+    <include file="/db/changelog/create/users.xml"/>
+    <include file="/db/changelog/create/login_tokens.xml"/>
+    <include file="/db/changelog/create/login_sessions.xml"/>
+    <include file="/db/changelog/create/personal_tokens.xml"/>
+    <include file="/db/changelog/create/personal_token_statistics.xml"/>
+    <include file="/db/changelog/create/organizations.xml"/>
+    <include file="/db/changelog/create/organization_members.xml"/>
+    <include file="/db/changelog/create/products.xml"/>
+    <include file="/db/changelog/create/product_tokens.xml"/>
+    <include file="/db/changelog/create/product_token_statistics.xml"/>
+    <include file="/db/changelog/create/bundles.xml"/>
+    <include file="/db/changelog/create/packages.xml"/>
+    <include file="/db/changelog/create/licenses.xml"/>
+    <include file="/db/changelog/create/devices.xml"/>
+    <include file="/db/changelog/create/activated_licenses.xml"/>
+
+    <!-- Save -->
+
+    <!-- Test -->
+    <include file="/db/changelog/test/test-changelog.xml" context="dev"/>
+</databaseChangeLog>

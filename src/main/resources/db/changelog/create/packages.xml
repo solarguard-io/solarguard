@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <changeSet author="silentsoft" id="create_packages_0000">
+        <createTable tableName="packages">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="packages_pkey"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bundle_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="${now}" name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="${now}" name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="bundle_id" constraintName="packages_bundle_id_key" tableName="packages"/>
+        <createIndex indexName="packages_organization_id_idx" tableName="packages">
+            <column name="organization_id"/>
+        </createIndex>
+        <createIndex indexName="packages_organization_id_bundle_id_idx" tableName="packages">
+            <column name="organization_id"/>
+            <column name="bundle_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="packages" constraintName="packages_organization_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="organizations" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="bundle_id" baseTableName="packages" constraintName="packages_bundle_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="bundles" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

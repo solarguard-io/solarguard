@@ -1,0 +1,13 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog context="dev" xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.5.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <changeSet author="silentsoft" id="test-changelog-0000">
+        <loadUpdateData tableName="users" primaryKey="id" file="db/changelog/test/users.csv"/>
+        <loadUpdateData tableName="organizations" primaryKey="id" file="db/changelog/test/organizations.csv"/>
+        <loadUpdateData tableName="organization_members" primaryKey="organization_id,user_id" file="db/changelog/test/organization_members.csv"/>
+        <loadUpdateData tableName="products" primaryKey="id" file="db/changelog/test/products.csv"/>
+        <loadUpdateData tableName="product_tokens" primaryKey="id" file="db/changelog/test/product_tokens.csv"/>
+        <loadUpdateData tableName="bundles" primaryKey="id,product_id" file="db/changelog/test/bundles.csv"/>
+        <loadUpdateData tableName="packages" primaryKey="id" file="db/changelog/test/packages.csv"/>
+        <loadUpdateData tableName="licenses" primaryKey="id" file="db/changelog/test/licenses.csv"/>
+    </changeSet>
+</databaseChangeLog>

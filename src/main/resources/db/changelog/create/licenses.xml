@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+    <changeSet author="silentsoft" id="create_licenses_0000">
+        <createTable tableName="licenses">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="licenses_pkey"/>
+            </column>
+            <column name="package_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="ENUM('PERPETUAL', 'SUBSCRIPTION')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expired_at" type="date"/>
+            <column defaultValueNumeric="0" name="device_limit" type="BIGINT"/>
+            <column name="note" type="VARCHAR"/>
+            <column defaultValueBoolean="false" name="is_revoked" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revoked_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="revoked_by" type="BIGINT"/>
+            <column defaultValueComputed="${now}" name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="${now}" name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="key" constraintName="licenses_key_key" tableName="licenses"/>
+        <createIndex indexName="licenses_package_id_idx" tableName="licenses">
+            <column name="package_id"/>
+        </createIndex>
+        <createIndex indexName="licenses_key_idx" tableName="licenses">
+            <column name="key"/>
+        </createIndex>
+        <createIndex indexName="licenses_package_id_key_idx" tableName="licenses">
+            <column name="package_id"/>
+            <column name="key"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="package_id" baseTableName="licenses" constraintName="licenses_package_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="packages" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
