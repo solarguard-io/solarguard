@@ -3,9 +3,9 @@ package org.silentsoft.solarguard.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.silentsoft.solarguard.util.JwtTokenUtil;
 import org.silentsoft.solarguard.vo.JwtTokenVO;
 import org.silentsoft.solarguard.vo.LoginVO;
-import org.silentsoft.solarguard.util.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +35,11 @@ public class AuthenticationControllerTest {
     @Test
     public void loginAndRefreshTokenAndLogoutTest() throws Exception {
         mvc.perform(post("/authentication/token")
-                .content(new ObjectMapper().writeValueAsString(new LoginVO("user", "user", "device")))
+                .content(new ObjectMapper().writeValueAsString(LoginVO.builder()
+                        .username("user")
+                        .password("user")
+                        .deviceName("device")
+                        .build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
                 status().isCreated()
@@ -69,7 +73,11 @@ public class AuthenticationControllerTest {
     @Test
     public void loginWithInvalidUserInfoTest() throws Exception {
         mvc.perform(post("/authentication/token")
-                .content(new ObjectMapper().writeValueAsString(new LoginVO("invalid", "invalid", "device")))
+                .content(new ObjectMapper().writeValueAsString(LoginVO.builder()
+                        .username("invalid")
+                        .password("invalid")
+                        .deviceName("device")
+                        .build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
                 status().isUnauthorized()

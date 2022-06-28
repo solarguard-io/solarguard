@@ -22,11 +22,14 @@ public class Response {
         public static final String USER_HAS_NO_PERMISSION = RESPONSE_IF + "user has no permission";
         public static final String USER_HAS_NOT_STAFF_ROLE_IN_ORGANIZATION = RESPONSE_IF + "user has not staff role in organization";
         public static final String ORGANIZATION_IS_NOT_EXISTS = RESPONSE_IF + "organization is not exists";
+        public static final String PRODUCT_API_IS_NOT_ALLOWED = RESPONSE_IF + "you don't have the proper authority, or it's called through the product API";
         public static final String PRODUCT_IS_NOT_EXISTS = RESPONSE_IF + "product is not exists";
         public static final String PRODUCT_TOKEN_IS_NOT_EXISTS = RESPONSE_IF + "product token is not exists";
         public static final String PERSONAL_TOKEN_IS_NOT_EXISTS = RESPONSE_IF + "personal token is not exists";
         public static final String PACKAGE_IS_NOT_EXISTS = RESPONSE_IF + "package is not exists";
         public static final String FAILED_TO_CREATE_USER = RESPONSE_IF + "failed to create user";
+        public static final String FAILED_TO_EDIT_USER = RESPONSE_IF + "failed to edit user";
+        public static final String FAILED_TO_DELETE_USER = RESPONSE_IF + "failed to delete user";
         public static final String FAILED_TO_CHECK_LICENSE_KEY = RESPONSE_IF + "license key does not exist or is invalid or does not have access authority";
     }
 
