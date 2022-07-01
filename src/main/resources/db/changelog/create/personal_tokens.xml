@@ -16,13 +16,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="note" type="VARCHAR"/>
-            <column name="used_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="expired_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
-            <column defaultValueBoolean="false" name="is_revoked" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="revoked_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
-            <column name="revoked_by" type="BIGINT"/>
             <column defaultValueComputed="${now}" name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>

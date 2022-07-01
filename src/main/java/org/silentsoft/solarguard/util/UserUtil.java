@@ -33,9 +33,22 @@ public class UserUtil {
                 .anyMatch(authority -> authority.getAuthority().equals(UserRole.ADMIN.name()));
     }
 
+    public static void checkIdentity(long userId) {
+        UserEntity user = getEntity();
+
+        long currentUserId = user.getId();
+        if (currentUserId == userId && user.getIsDeleted()) {
+            throw new AccessDeniedException(String.format("The user '%d' is not allowed to perform this action because it is deleted account.", userId));
+        }
+
+        if (currentUserId != userId && isNotAdmin()) {
+            throw new AccessDeniedException(String.format("Must be the same user or admin to perform this action. (current: %d, target: %d)", currentUserId, userId));
+        }
+    }
+
     public static void checkAdminAuthority() {
-        if (!isAdmin()) {
-            throw new AccessDeniedException(String.format("The user '%d' is not an admin.", UserUtil.getId()));
+        if (isNotAdmin()) {
+            throw new AccessDeniedException(String.format("The user '%d' is not allowed to perform this action because does not have admin authority.", getId()));
         }
     }
 

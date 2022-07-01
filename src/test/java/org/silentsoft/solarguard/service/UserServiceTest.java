@@ -2,10 +2,15 @@ package org.silentsoft.solarguard.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.silentsoft.solarguard.context.support.WithBrowser;
 import org.silentsoft.solarguard.context.support.WithProduct;
+import org.silentsoft.solarguard.entity.PersonalTokenEntity;
 import org.silentsoft.solarguard.entity.UserEntity;
 import org.silentsoft.solarguard.entity.UserRole;
+import org.silentsoft.solarguard.exception.UserNotFoundException;
 import org.silentsoft.solarguard.repository.UserRepository;
+import org.silentsoft.solarguard.util.JwtTokenUtil;
+import org.silentsoft.solarguard.vo.PersonalTokenPostVO;
 import org.silentsoft.solarguard.vo.UserPatchVO;
 import org.silentsoft.solarguard.vo.UserPostVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @SpringBootTest
@@ -25,6 +31,9 @@ public class UserServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @Test
     @WithUserDetails
@@ -60,6 +69,40 @@ public class UserServiceTest {
     }
 
     @Test
+    @WithBrowser
+    public void createPersonalTokenWithUserAuthorityTest() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            // empty note
+            userService.createPersonalToken(2, PersonalTokenPostVO.builder().build());
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            PersonalTokenEntity personalToken = userService.createPersonalToken(2, PersonalTokenPostVO.builder().note("TestToken1").build());
+            Assertions.assertEquals(2, personalToken.getUser().getId());
+            Assertions.assertTrue(jwtTokenUtil.notExpiredToken(personalToken.getAccessToken()));
+            Assertions.assertEquals("TestToken1", personalToken.getNote());
+            Assertions.assertNull(personalToken.getExpiredAt());
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            PersonalTokenEntity personalToken = userService.createPersonalToken(2, PersonalTokenPostVO.builder().note("TestToken2").expiredAt(LocalDate.now().plusDays(1)).build());
+            Assertions.assertEquals(LocalDate.now().plusDays(1), LocalDate.ofEpochDay(personalToken.getExpiredAt().toLocalDateTime().toLocalDate().toEpochDay()));
+            Assertions.assertTrue(jwtTokenUtil.notExpiredToken(personalToken.getAccessToken()));
+        });
+
+        Assertions.assertDoesNotThrow(() -> {
+            PersonalTokenEntity personalToken = userService.createPersonalToken(2, PersonalTokenPostVO.builder().note("TestToken3").expiredAt(LocalDate.now().minusDays(1)).build());
+            Assertions.assertEquals(LocalDate.now().minusDays(1), LocalDate.ofEpochDay(personalToken.getExpiredAt().toLocalDateTime().toLocalDate().toEpochDay()));
+            Assertions.assertTrue(jwtTokenUtil.expiredToken(personalToken.getAccessToken()));
+        });
+
+        Assertions.assertThrows(AccessDeniedException.class, () -> {
+            // not mine
+            userService.createPersonalToken(1, PersonalTokenPostVO.builder().note("TestToken4").build());
+        });
+    }
+
+    @Test
     @WithUserDetails("admin")
     public void dataIntegrityTest() {
         UserEntity user = userService.createUser(UserPostVO.builder().username("dataIntegrityTest").password("HelloWorld").build());
@@ -85,17 +128,13 @@ public class UserServiceTest {
 
         userService.deleteUser(user.getId());
 
-        Assertions.assertDoesNotThrow(() -> {
+        Assertions.assertThrows(UserNotFoundException.class, () -> {
             userService.getUser(userId);
         });
 
         Optional<UserEntity> optionalUser = userRepository.findById(userId);
         Assertions.assertTrue(optionalUser.isPresent());
         Assertions.assertTrue(optionalUser.get().getIsDeleted());
-
-        user = userService.patchUser(user.getId(), UserPatchVO.builder().username("dataIntegrityTest3").build());
-        // admin user can edit deleted user
-        Assertions.assertEquals("dataIntegrityTest3", user.getUsername());
     }
 
     @Test

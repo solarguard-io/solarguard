@@ -1,5 +1,6 @@
 package org.silentsoft.solarguard.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,6 +11,7 @@ import org.silentsoft.solarguard.core.config.oas.expression.Response;
 import org.silentsoft.solarguard.core.config.security.expression.Authority;
 import org.silentsoft.solarguard.entity.UserEntity;
 import org.silentsoft.solarguard.service.UserService;
+import org.silentsoft.solarguard.vo.PersonalTokenPostVO;
 import org.silentsoft.solarguard.vo.UserPatchVO;
 import org.silentsoft.solarguard.vo.UserPostVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +84,20 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable("userId") long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Hidden
+    @PreAuthorize(Authority.Allow.BROWSER_API)
+    @GetMapping(path = "/{userId}/tokens", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getPersonalTokens(@PathVariable("userId") long userId) {
+        return ResponseEntity.ok(userService.getPersonalTokens(userId));
+    }
+
+    @Hidden
+    @PreAuthorize(Authority.Allow.BROWSER_API)
+    @PostMapping(path = "/{userId}/tokens", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createPersonalToken(@PathVariable("userId") long userId, @RequestBody PersonalTokenPostVO personalToken) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createPersonalToken(userId, personalToken));
     }
 
 }

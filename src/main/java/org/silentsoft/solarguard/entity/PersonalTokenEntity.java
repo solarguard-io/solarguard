@@ -25,15 +25,7 @@ public class PersonalTokenEntity {
 
     private String note;
 
-    private Timestamp usedAt;
-
     private Timestamp expiredAt;
-
-    private Boolean isRevoked;
-
-    private Timestamp revokedAt;
-
-    private Long revokedBy;
 
     private Timestamp createdAt;
 

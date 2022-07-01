@@ -21,19 +21,17 @@ public class JwtTokenUtil {
     private String secret;
 
     public enum TokenType {
-        LOGIN_ACCESS_TOKEN(1, true, 1000 * 60 * 15),               // 15 minutes
-        LOGIN_REFRESH_TOKEN(2, true, 1000 * 60 * 60 * 24 * 7 * 8), // 8  weeks
-        PERSONAL_ACCESS_TOKEN(3, true, 1000 * 60 * 60 * 24 * 30),  // 30 days
-        PRODUCT_ACCESS_TOKEN(4, false, -1);
+        LOGIN_ACCESS_TOKEN(1, 1000 * 60 * 15),               // 15 minutes
+        LOGIN_REFRESH_TOKEN(2, 1000 * 60 * 60 * 24 * 7 * 8), // 8  weeks
+        PERSONAL_ACCESS_TOKEN(3, Long.MAX_VALUE),
+        PRODUCT_ACCESS_TOKEN(4, Long.MAX_VALUE);
 
         private int identifier;
-        private boolean hasExpiry;
 
         private long expiry;
 
-        TokenType(int identifier, boolean hasExpiry, long expiry) {
+        TokenType(int identifier, long expiry) {
             this.identifier = identifier;
-            this.hasExpiry = hasExpiry;
             this.expiry = expiry;
         }
 
@@ -42,7 +40,7 @@ public class JwtTokenUtil {
         }
 
         public boolean hasExpiry() {
-            return hasExpiry;
+            return expiry < Long.MAX_VALUE;
         }
 
         public long getExpiry() {
@@ -131,6 +129,10 @@ public class JwtTokenUtil {
         Claims claims = Jwts.claims();
         claims.put(Claim.USER_ID.name(), userId);
         return generateToken(claims, TokenType.LOGIN_REFRESH_TOKEN);
+    }
+
+    public String generatePersonalAccessToken(long userId) {
+        return generatePersonalAccessToken(userId, TokenType.PERSONAL_ACCESS_TOKEN.getExpiry());
     }
 
     public String generatePersonalAccessToken(long userId, long expiry) {

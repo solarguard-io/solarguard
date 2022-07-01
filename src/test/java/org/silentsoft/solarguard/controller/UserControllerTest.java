@@ -286,7 +286,7 @@ public class UserControllerTest {
             mvc.perform(delete("/api/users/" + createdUser.getId())).andExpect(status().isNoContent());
 
             // already deleted
-            mvc.perform(delete("/api/users/" + createdUser.getId())).andExpect(status().isUnprocessableEntity());
+            mvc.perform(delete("/api/users/" + createdUser.getId())).andExpect(status().isNotFound());
         });
     }
 

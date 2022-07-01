@@ -89,8 +89,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                                         if (JwtTokenUtil.TokenType.PERSONAL_ACCESS_TOKEN.equals(tokenType)) {
                                             PersonalTokenEntity entity = personalTokenRepository.findByUserIdAndAccessToken(userId, jwtToken).orElse(null);
                                             if (entity == null) {
-                                                response.sendError(HttpStatus.UNPROCESSABLE_ENTITY.value());
-                                            } else if (Boolean.TRUE.equals(entity.getIsRevoked())) {
                                                 response.sendError(HttpStatus.UNAUTHORIZED.value());
                                             } else {
                                                 ThreadLocalHolder.put(ThreadLocalKeys.PERSONAL_TOKEN_ID, entity.getId());
