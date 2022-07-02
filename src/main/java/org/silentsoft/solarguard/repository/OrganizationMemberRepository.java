@@ -13,7 +13,7 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
 
     List<OrganizationMemberEntity> findAllById_OrganizationId(long organizationId);
 
-    default boolean existsByIdAndRoleStaff(OrganizationMemberId id) {
+    default boolean existsByIdAndRoleIsStaff(OrganizationMemberId id) {
         return existsByIdAndRole(id, OrganizationMemberRole.STAFF);
     }
 
