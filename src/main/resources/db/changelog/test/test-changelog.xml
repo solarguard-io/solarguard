@@ -6,8 +6,8 @@
         <loadUpdateData tableName="organization_members" primaryKey="organization_id,user_id" file="db/changelog/test/organization_members.csv"/>
         <loadUpdateData tableName="products" primaryKey="id" file="db/changelog/test/products.csv"/>
         <loadUpdateData tableName="product_tokens" primaryKey="id" file="db/changelog/test/product_tokens.csv"/>
-        <loadUpdateData tableName="bundles" primaryKey="id,product_id" file="db/changelog/test/bundles.csv"/>
         <loadUpdateData tableName="packages" primaryKey="id" file="db/changelog/test/packages.csv"/>
+        <loadUpdateData tableName="bundles" primaryKey="package_id,product_id" file="db/changelog/test/bundles.csv"/>
         <loadUpdateData tableName="licenses" primaryKey="id" file="db/changelog/test/licenses.csv"/>
     </changeSet>
 </databaseChangeLog>

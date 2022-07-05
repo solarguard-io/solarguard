@@ -10,6 +10,8 @@ import java.util.List;
 @Repository
 public interface BundleRepository extends JpaRepository<BundleEntity, BundleId> {
 
+    List<BundleEntity> findAllById_PackageId(long packageId);
+
     List<BundleEntity> findAllById_ProductId(long productId);
 
 }

@@ -11,12 +11,12 @@ import java.io.Serializable;
 @Embeddable
 public class BundleId implements Serializable {
 
-    private long id;
+    private long packageId;
 
     private long productId;
 
-    public BundleId(long id, long productId) {
-        this.id = id;
+    public BundleId(long packageId, long productId) {
+        this.packageId = packageId;
         this.productId = productId;
     }
 

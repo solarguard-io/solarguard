@@ -1,9 +1,7 @@
 package org.silentsoft.solarguard.entity;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Delegate;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.EmbeddedId;
@@ -17,9 +15,6 @@ import java.sql.Timestamp;
 @DynamicInsert
 public class BundleEntity implements Serializable {
 
-    @Delegate
-    @Getter(value = AccessLevel.NONE)
-    @Setter(value = AccessLevel.NONE)
     @EmbeddedId
     private BundleId id;
 

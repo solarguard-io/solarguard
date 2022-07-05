@@ -17,8 +17,8 @@
     <include file="/db/changelog/create/products.xml"/>
     <include file="/db/changelog/create/product_tokens.xml"/>
     <include file="/db/changelog/create/product_token_statistics.xml"/>
-    <include file="/db/changelog/create/bundles.xml"/>
     <include file="/db/changelog/create/packages.xml"/>
+    <include file="/db/changelog/create/bundles.xml"/>
     <include file="/db/changelog/create/licenses.xml"/>
     <include file="/db/changelog/create/devices.xml"/>
     <include file="/db/changelog/create/activated_licenses.xml"/>

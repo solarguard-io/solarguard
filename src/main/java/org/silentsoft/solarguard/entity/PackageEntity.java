@@ -1,6 +1,5 @@
 package org.silentsoft.solarguard.entity;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
@@ -8,7 +7,6 @@ import org.hibernate.annotations.DynamicInsert;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
 
 @Getter
 @Setter
@@ -23,14 +21,6 @@ public class PackageEntity implements Serializable {
     @ManyToOne
     @JoinColumn(name = "organization_id")
     private OrganizationEntity organization;
-
-    @Getter(value = AccessLevel.NONE)
-    @Setter(value = AccessLevel.NONE)
-    private Long bundleId;
-
-    @OneToMany
-    @JoinColumn(name = "id", referencedColumnName = "bundleId")
-    private List<BundleEntity> bundles;
 
     private String name;
 
