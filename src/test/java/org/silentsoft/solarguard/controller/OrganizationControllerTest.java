@@ -1,8 +1,10 @@
 package org.silentsoft.solarguard.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.silentsoft.solarguard.context.support.WithProduct;
+import org.silentsoft.solarguard.entity.OrganizationEntity;
 import org.silentsoft.solarguard.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -114,6 +116,53 @@ public class OrganizationControllerTest {
                 .content(new ObjectMapper().writeValueAsString(OrganizationPostVO.builder().name("Test Organization").build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated());
+    }
+
+    @Test
+    public void patchOrganizationWithoutAuthority() throws Exception {
+        mvc.perform(patch("/api/organizations/{organizationId}", "100")
+                .content(new ObjectMapper().writeValueAsString(OrganizationPatchVO.builder().name("Test Organization2").build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void patchOrganizationWithProductAuthority() throws Exception {
+        mvc.perform(patch("/api/organizations/{organizationId}", "100")
+                .content(new ObjectMapper().writeValueAsString(OrganizationPatchVO.builder().name("Test Organization2").build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void patchOrganizationWithMemberAuthority() throws Exception {
+        mvc.perform(patch("/api/organizations/{organizationId}", "100")
+                .content(new ObjectMapper().writeValueAsString(OrganizationPatchVO.builder().name("Test Organization2").build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test1")
+    public void patchOrganizationWithNonMemberAuthority() throws Exception {
+        mvc.perform(patch("/api/organizations/{organizationId}", "100")
+                .content(new ObjectMapper().writeValueAsString(OrganizationPatchVO.builder().name("Test Organization2").build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("admin")
+    public void patchOrganizationWithStaffAuthority() throws Exception {
+        mvc.perform(patch("/api/organizations/{organizationId}", "100")
+                .content(new ObjectMapper().writeValueAsString(OrganizationPatchVO.builder().name("Test Organization2").build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andDo(result -> {
+            OrganizationEntity organization = new ObjectMapper().readValue(result.getResponse().getContentAsString(), OrganizationEntity.class);
+            Assertions.assertEquals("Test Organization2", organization.getName());
+        });
     }
 
     @Test

@@ -61,6 +61,18 @@ public class OrganizationController {
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @PatchMapping(path = "/{organizationId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.OK, content = @Content(schema = @Schema(implementation = OrganizationEntity.class))),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_HAS_NOT_STAFF_ROLE_IN_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.ORGANIZATION_IS_NOT_EXISTS),
+            @ApiResponse(responseCode = Response.Code.UNPROCESSABLE_ENTITY, description = Response.Description.FAILED_TO_UPDATE_ORGANIZATION)
+    })
+    public ResponseEntity<?> patchOrganization(@PathVariable(value = "organizationId") long organizationId, @RequestBody OrganizationPatchVO organization) {
+        return ResponseEntity.ok(organizationService.patchOrganization(organizationId, organization));
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
     @DeleteMapping("/{organizationId}")
     @ApiResponses(value = {
             @ApiResponse(responseCode = Response.Code.NO_CONTENT),

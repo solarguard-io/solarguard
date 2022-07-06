@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -53,9 +54,7 @@ public class OrganizationService {
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
     public OrganizationEntity createOrganization(OrganizationPostVO organization) {
-        if (!StringUtils.hasLength(organization.getName())) {
-            throw new IllegalArgumentException("Organization name is required.");
-        }
+        checkOrganizationName(organization.getName());
 
         long userId = UserUtil.getId();
 
@@ -71,6 +70,21 @@ public class OrganizationService {
         organizationMember.setCreatedBy(userId);
         organizationMember.setUpdatedBy(userId);
         organizationMemberRepository.save(organizationMember);
+
+        return entity;
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    public OrganizationEntity patchOrganization(long organizationId, OrganizationPatchVO organization) {
+        organizationUtil.checkStaffAuthority(organizationId);
+
+        checkOrganizationName(organization.getName());
+
+        OrganizationEntity entity = getOrganization(organizationId);
+        entity.setName(organization.getName());
+        entity.setUpdatedBy(UserUtil.getId());
+        entity.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        entity = organizationRepository.save(entity);
 
         return entity;
     }
@@ -225,6 +239,12 @@ public class OrganizationService {
         }
 
         return packageEntity;
+    }
+
+    private void checkOrganizationName(String name) {
+        if (!StringUtils.hasLength(name)) {
+            throw new IllegalArgumentException("Organization name is required.");
+        }
     }
 
 }
