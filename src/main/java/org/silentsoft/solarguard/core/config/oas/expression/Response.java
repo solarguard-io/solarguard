@@ -35,6 +35,9 @@ public class Response {
         public static final String FAILED_TO_ADD_MEMBER_TO_ORGANIZATION = RESPONSE_IF + "failed to add member to organization";
         public static final String FAILED_TO_REMOVE_MEMBER_FROM_ORGANIZATION = RESPONSE_IF + "failed to remove member from organization";
         public static final String FAILED_TO_ADD_PRODUCT_TO_ORGANIZATION = RESPONSE_IF + "failed to add product to organization";
+        public static final String FAILED_TO_UPDATE_PRODUCT = RESPONSE_IF + "failed to update product";
+        public static final String FAILED_TO_CREATE_PRODUCT_TOKEN = RESPONSE_IF + "failed to create product token";
+        public static final String FAILED_TO_UPDATE_PRODUCT_TOKEN = RESPONSE_IF + "failed to update product token";
         public static final String FAILED_TO_ADD_PACKAGE_TO_ORGANIZATION = RESPONSE_IF + "failed to add package to organization";
         public static final String FAILED_TO_CHECK_LICENSE_KEY = RESPONSE_IF + "license key does not exist or is invalid or does not have access authority";
     }

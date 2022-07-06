@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductTokenStatisticsRepository extends JpaRepository<ProductTokenStatisticsEntity, ProductTokenStatisticsId> {
 
+    void deleteAllById_ProductTokenId(long productTokenId);
+
 }
