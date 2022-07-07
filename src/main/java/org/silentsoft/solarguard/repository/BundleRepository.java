@@ -14,4 +14,6 @@ public interface BundleRepository extends JpaRepository<BundleEntity, BundleId> 
 
     List<BundleEntity> findAllById_ProductId(long productId);
 
+    void deleteAllById_PackageId(long packageId);
+
 }
