@@ -269,6 +269,10 @@ public class OrganizationControllerTest {
     public void addMembersWithStaffAuthority() throws Exception {
         // User IDs are required.
         mvc.perform(post("/api/organizations/{organizationId}/members", "101")
+                .content(new ObjectMapper().writeValueAsString(OrganizationMemberPostVO.builder().build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnprocessableEntity());
+        mvc.perform(post("/api/organizations/{organizationId}/members", "101")
                 .content(new ObjectMapper().writeValueAsString(OrganizationMemberPostVO.builder().userIds(Collections.emptyList()).build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isUnprocessableEntity());
@@ -300,6 +304,14 @@ public class OrganizationControllerTest {
         ).andExpect(status().isNoContent());
 
         // No one to remove.
+        mvc.perform(delete("/api/organizations/{organizationId}/members", "101")
+                .content(new ObjectMapper().writeValueAsString(OrganizationMemberDeleteVO.builder().build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnprocessableEntity());
+        mvc.perform(delete("/api/organizations/{organizationId}/members", "101")
+                .content(new ObjectMapper().writeValueAsString(OrganizationMemberDeleteVO.builder().userIds(Collections.singletonList(null)).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnprocessableEntity());
         mvc.perform(delete("/api/organizations/{organizationId}/members", "101")
                 .content(new ObjectMapper().writeValueAsString(OrganizationMemberDeleteVO.builder().userIds(Collections.singletonList(4L)).build()))
                 .contentType(MediaType.APPLICATION_JSON)

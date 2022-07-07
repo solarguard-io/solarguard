@@ -108,11 +108,13 @@ public class OrganizationService {
     public List<OrganizationMemberEntity> addMembers(long organizationId, OrganizationMemberPostVO organizationMemberPostVO) {
         organizationUtil.checkStaffAuthority(organizationId);
 
-        organizationMemberPostVO.getUserIds().remove(UserUtil.getId());
-        organizationMemberPostVO.getUserIds().removeIf(Objects::isNull);
-        organizationMemberPostVO.getUserIds().removeIf(userId -> !userRepository.findByIdAndIsDeletedFalse(userId).isPresent());
+        if (Objects.nonNull(organizationMemberPostVO.getUserIds())) {
+            organizationMemberPostVO.getUserIds().remove(UserUtil.getId());
+            organizationMemberPostVO.getUserIds().removeIf(Objects::isNull);
+            organizationMemberPostVO.getUserIds().removeIf(userId -> !userRepository.findByIdAndIsDeletedFalse(userId).isPresent());
+        }
 
-        if (organizationMemberPostVO.getUserIds().isEmpty()) {
+        if (organizationMemberPostVO.getUserIds() == null || organizationMemberPostVO.getUserIds().isEmpty()) {
             throw new IllegalArgumentException("User IDs are required.");
         }
 
@@ -141,13 +143,16 @@ public class OrganizationService {
     public void removeMembers(long organizationId, OrganizationMemberDeleteVO organizationMemberDeleteVO) {
         organizationUtil.checkStaffAuthority(organizationId);
 
-        organizationMemberDeleteVO.getUserIds().removeIf(Objects::isNull);
-
         List<OrganizationMemberId> organizationMemberIds = new ArrayList<>();
-        for (long userIdToRemove : organizationMemberDeleteVO.getUserIds()) {
-            OrganizationMemberId organizationMemberId = new OrganizationMemberId(organizationId, userIdToRemove);
-            if (organizationMemberRepository.existsById(organizationMemberId)) {
-                organizationMemberIds.add(organizationMemberId);
+
+        if (Objects.nonNull(organizationMemberDeleteVO.getUserIds())) {
+            organizationMemberDeleteVO.getUserIds().removeIf(Objects::isNull);
+
+            for (long userIdToRemove : organizationMemberDeleteVO.getUserIds()) {
+                OrganizationMemberId organizationMemberId = new OrganizationMemberId(organizationId, userIdToRemove);
+                if (organizationMemberRepository.existsById(organizationMemberId)) {
+                    organizationMemberIds.add(organizationMemberId);
+                }
             }
         }
 
@@ -196,11 +201,15 @@ public class OrganizationService {
     public PackageEntity addPackage(long organizationId, PackagePostVO packagePostVO) {
         organizationUtil.checkStaffAuthority(organizationId);
 
-        packagePostVO.getProductIds().removeIf(Objects::isNull);
-
         if (!StringUtils.hasLength(packagePostVO.getName())) {
             throw new IllegalArgumentException("Package name is required.");
-        } else if (packagePostVO.getProductIds().isEmpty()) {
+        }
+
+        if (Objects.nonNull(packagePostVO.getProductIds())) {
+            packagePostVO.getProductIds().removeIf(Objects::isNull);
+        }
+
+        if (packagePostVO.getProductIds() == null || packagePostVO.getProductIds().isEmpty()) {
             throw new IllegalArgumentException("Products are required.");
         }
 
