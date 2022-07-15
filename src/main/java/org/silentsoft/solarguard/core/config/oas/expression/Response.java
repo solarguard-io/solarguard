@@ -7,6 +7,8 @@ public class Response {
         public static final String CREATED = "201";
         public static final String NO_CONTENT = "204";
         public static final String BAD_REQUEST = "400";
+        public static final String UNAUTHORIZED = "401";
+        public static final String PAYMENT_REQUIRED = "402";
         public static final String FORBIDDEN = "403";
         public static final String NOT_FOUND = "404";
         public static final String UNPROCESSABLE_ENTITY = "422";
@@ -40,7 +42,11 @@ public class Response {
         public static final String FAILED_TO_UPDATE_PRODUCT_TOKEN = RESPONSE_IF + "failed to update product token";
         public static final String FAILED_TO_ADD_PACKAGE_TO_ORGANIZATION = RESPONSE_IF + "failed to add package to organization";
         public static final String FAILED_TO_UPDATE_PACKAGE = RESPONSE_IF + "failed to update package";
-        public static final String FAILED_TO_CHECK_LICENSE_KEY = RESPONSE_IF + "license key does not exist or is invalid or does not have access authority";
+        public static final String FAILED_TO_CHECK_OR_ACTIVATE_LICENSE_KEY_OR_DEVICE_IS_BANNED = RESPONSE_IF + "failed to check or activate license key or device is banned";
+        public static final String FAILED_TO_ISSUE_LICENSE = RESPONSE_IF + "failed to issue license";
+        public static final String PRODUCT_CODE_OR_TOKEN_IS_INVALID = RESPONSE_IF + "product code or token is invalid";
+        public static final String NO_LICENSE_PACKAGE_FOUND_CORRESPONDING_TO_THE_PRODUCT = RESPONSE_IF + "no license package found corresponding to the product";
+        public static final String LICENSE_IS_EXPIRED_OR_REVOKED_OR_LIMITED = RESPONSE_IF + "license is expired or revoked or device limit exceeded";
     }
 
 }

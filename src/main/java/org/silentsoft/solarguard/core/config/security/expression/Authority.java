@@ -15,6 +15,7 @@ public class Authority {
     public class Allow {
 
         public static final String BROWSER_API = "hasAuthority('BROWSER_API')";
+        public static final String PRODUCT_API = "hasAuthority('PRODUCT_API')";
 
     }
 

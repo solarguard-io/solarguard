@@ -2,7 +2,10 @@ package org.silentsoft.solarguard.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.silentsoft.solarguard.entity.LicenseEntity;
+import org.silentsoft.solarguard.entity.LicenseType;
 import org.silentsoft.solarguard.entity.PackageEntity;
+import org.silentsoft.solarguard.vo.LicensePostVO;
 import org.silentsoft.solarguard.vo.PackagePatchVO;
 import org.silentsoft.solarguard.vo.PackagePostVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -46,17 +50,58 @@ public class PackageServiceTest {
     public void dataIntegrityTest() {
         long packageId = organizationService.addPackage(100, PackagePostVO.builder().name("PackageServiceTest.dataIntegrityTest.package.1").productIds(Arrays.asList(200L)).build()).getId();
 
-        PackageEntity entity = packageService.getPackage(packageId);
-        Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.1", entity.getName());
+        PackageEntity packageEntity = packageService.getPackage(packageId);
+        Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.1", packageEntity.getName());
         Assertions.assertEquals(1, packageService.getBundles(packageId).size());
 
-        entity = packageService.patchPackage(packageId, PackagePatchVO.builder().name("PackageServiceTest.dataIntegrityTest.package.2").productIds(Arrays.asList(200L, 201L)).build());
-        Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.2", entity.getName());
+        packageEntity = packageService.patchPackage(packageId, PackagePatchVO.builder().name("PackageServiceTest.dataIntegrityTest.package.2").productIds(Arrays.asList(200L, 201L)).build());
+        Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.2", packageEntity.getName());
         Assertions.assertEquals(2, packageService.getBundles(packageId).size());
 
-        entity = packageService.patchPackage(packageId, PackagePatchVO.builder().productIds(Collections.emptyList()).build());
-        Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.2", entity.getName());
+        packageEntity = packageService.patchPackage(packageId, PackagePatchVO.builder().productIds(Collections.emptyList()).build());
+        Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.2", packageEntity.getName());
         Assertions.assertEquals(0, packageService.getBundles(packageId).size());
+    }
+
+    @Test
+    @WithUserDetails("admin")
+    public void issueLicenseTest() {
+        long packageId = organizationService.addPackage(100, PackagePostVO.builder().name("PackageServiceTest.issueLicenseTest.package.1").productIds(Arrays.asList(200L)).build()).getId();
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            packageService.issueLicense(packageId, LicensePostVO.builder().build());
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).build());
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now().minusDays(1)).build());
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).build());
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).deviceLimit(-1L).build());
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).deviceLimit(0L).build());
+        });
+
+        Assertions.assertEquals(0, packageService.getLicenses(packageId).size());
+
+        LicenseEntity licenseEntity = packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).deviceLimit(1L).note(" NOTE ").build());
+
+        Assertions.assertEquals(1, packageService.getLicenses(packageId).size());
+        Assertions.assertEquals(packageId, licenseEntity.getPackage().getId());
+        Assertions.assertNotNull(licenseEntity.getKey());
+        Assertions.assertEquals(LicenseType.SUBSCRIPTION, licenseEntity.getType());
+        Assertions.assertEquals(LocalDate.now(), licenseEntity.getExpiredAt().toLocalDate());
+        Assertions.assertTrue(licenseEntity.getIsDeviceLimited());
+        Assertions.assertEquals(1L, licenseEntity.getDeviceLimit());
+        Assertions.assertEquals("NOTE", licenseEntity.getNote());
+
+        packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).build());
+        Assertions.assertEquals(2, packageService.getLicenses(packageId).size());
     }
 
 }

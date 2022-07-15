@@ -1,16 +1,16 @@
 package org.silentsoft.solarguard.service;
 
 import org.silentsoft.solarguard.core.config.security.expression.Authority;
-import org.silentsoft.solarguard.entity.BundleEntity;
-import org.silentsoft.solarguard.entity.BundleId;
-import org.silentsoft.solarguard.entity.PackageEntity;
-import org.silentsoft.solarguard.entity.ProductEntity;
+import org.silentsoft.solarguard.entity.*;
 import org.silentsoft.solarguard.exception.PackageNotFoundException;
 import org.silentsoft.solarguard.repository.BundleRepository;
+import org.silentsoft.solarguard.repository.LicenseRepository;
 import org.silentsoft.solarguard.repository.PackageRepository;
 import org.silentsoft.solarguard.repository.ProductRepository;
+import org.silentsoft.solarguard.util.LicenseUtil;
 import org.silentsoft.solarguard.util.OrganizationUtil;
 import org.silentsoft.solarguard.util.UserUtil;
+import org.silentsoft.solarguard.vo.LicensePostVO;
 import org.silentsoft.solarguard.vo.PackagePatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +35,9 @@ public class PackageService {
 
     @Autowired
     private BundleRepository bundleRepository;
+
+    @Autowired
+    private LicenseRepository licenseRepository;
 
     @Autowired
     private OrganizationUtil organizationUtil;
@@ -110,6 +115,54 @@ public class PackageService {
         checkMemberAuthority(packageId);
 
         return bundleRepository.findAllById_PackageId(packageId);
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    public LicenseEntity issueLicense(long packageId, LicensePostVO licensePostVO) {
+        checkMemberAuthority(packageId);
+
+        if (licensePostVO.getLicenseType() == null) {
+            throw new IllegalArgumentException("License type is required.");
+        }
+        if (licensePostVO.getLicenseType() == LicenseType.SUBSCRIPTION) {
+            if (licensePostVO.getExpiredAt() == null) {
+                throw new IllegalArgumentException("Expiration date is required.");
+            } else if (licensePostVO.getExpiredAt().isBefore(LocalDate.now())) {
+                throw new IllegalArgumentException("Expiration date must be after current date.");
+            }
+        }
+        if (licensePostVO.getIsDeviceLimited() != null && licensePostVO.getIsDeviceLimited()) {
+            if (licensePostVO.getDeviceLimit() == null) {
+                throw new IllegalArgumentException("Device limit is required.");
+            } else if (licensePostVO.getDeviceLimit() <= 0) {
+                throw new IllegalArgumentException("Device limit must be greater than 0.");
+            }
+        }
+
+        LicenseEntity licenseEntity = new LicenseEntity();
+        licenseEntity.setPackage(findPackage(packageId));
+        licenseEntity.setKey(LicenseUtil.generateLicenseKey());
+        licenseEntity.setType(licensePostVO.getLicenseType());
+        if (licensePostVO.getLicenseType() == LicenseType.SUBSCRIPTION) {
+            licenseEntity.setExpiredAt(Date.valueOf(licensePostVO.getExpiredAt()));
+        }
+        if (licensePostVO.getIsDeviceLimited() != null) {
+            licenseEntity.setIsDeviceLimited(licensePostVO.getIsDeviceLimited());
+            licenseEntity.setDeviceLimit(licensePostVO.getDeviceLimit());
+        }
+        if (StringUtils.hasText(licensePostVO.getNote())) {
+            licenseEntity.setNote(licensePostVO.getNote().trim());
+        }
+        licenseEntity.setCreatedBy(UserUtil.getId());
+        licenseEntity.setUpdatedBy(UserUtil.getId());
+        return licenseRepository.save(licenseEntity);
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    public List<LicenseEntity> getLicenses(long packageId) {
+        checkMemberAuthority(packageId);
+
+        return licenseRepository.findAllBy_package(findPackage(packageId));
     }
 
     private void checkMemberAuthority(long packageId) {

@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.sql.Timestamp;
 
 @Getter
@@ -14,17 +14,17 @@ import java.sql.Timestamp;
 @DynamicInsert
 public class DeviceEntity {
 
-    @Id
-    private String id;
+    @EmbeddedId
+    private DeviceId id;
 
-    private String macAddress;
+    private String name;
 
-    private Timestamp createdAt;
+    private Long activationCount;
 
-    private Long createdBy;
+    private Boolean isBanned;
 
-    private Timestamp updatedAt;
+    private Timestamp firstActivatedAt;
 
-    private Long updatedBy;
+    private Timestamp lastActivatedAt;
 
 }

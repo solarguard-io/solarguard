@@ -21,7 +21,6 @@
     <include file="/db/changelog/create/bundles.xml"/>
     <include file="/db/changelog/create/licenses.xml"/>
     <include file="/db/changelog/create/devices.xml"/>
-    <include file="/db/changelog/create/activated_licenses.xml"/>
 
     <!-- Save -->
 

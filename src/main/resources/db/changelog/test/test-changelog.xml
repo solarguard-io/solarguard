@@ -9,5 +9,6 @@
         <loadUpdateData tableName="packages" primaryKey="id" file="db/changelog/test/packages.csv"/>
         <loadUpdateData tableName="bundles" primaryKey="package_id,product_id" file="db/changelog/test/bundles.csv"/>
         <loadUpdateData tableName="licenses" primaryKey="id" file="db/changelog/test/licenses.csv"/>
+        <loadUpdateData tableName="devices" primaryKey="license_id,code" file="db/changelog/test/devices.csv"/>
     </changeSet>
 </databaseChangeLog>

@@ -3,6 +3,7 @@ package org.silentsoft.solarguard.entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @Entity(name = "licenses")
+@DynamicInsert
 public class LicenseEntity {
 
     @Id
@@ -28,6 +30,8 @@ public class LicenseEntity {
     private LicenseType type;
 
     private Date expiredAt;
+
+    private Boolean isDeviceLimited;
 
     private Long deviceLimit;
 

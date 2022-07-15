@@ -126,7 +126,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                                 } else {
                                     ProductTokenEntity entity = productTokenRepository.findByProductIdAndAccessToken(productId, jwtToken);
                                     if (entity == null) {
-                                        response.sendError(HttpStatus.UNPROCESSABLE_ENTITY.value());
+                                        response.sendError(HttpStatus.UNAUTHORIZED.value());
                                     } else if (Boolean.TRUE.equals(entity.getIsRevoked())) {
                                         response.sendError(HttpStatus.UNAUTHORIZED.value());
                                     } else {

@@ -9,15 +9,15 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @Embeddable
-public class ActivatedLicenseId implements Serializable {
+public class DeviceId implements Serializable {
 
     private long licenseId;
 
-    private String deviceId;
+    private String code;
 
-    public ActivatedLicenseId(long licenseId, String deviceId) {
+    public DeviceId(long licenseId, String code) {
         this.licenseId = licenseId;
-        this.deviceId = deviceId;
+        this.code = code;
     }
 
 }

@@ -3,6 +3,8 @@ package org.silentsoft.solarguard.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.silentsoft.solarguard.context.support.WithProduct;
+import org.silentsoft.solarguard.entity.LicenseType;
+import org.silentsoft.solarguard.vo.LicensePostVO;
 import org.silentsoft.solarguard.vo.PackagePatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,8 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -152,6 +153,64 @@ public class PackageControllerTest {
     @WithProduct(200)
     public void getBundlesWithProductAuthority() throws Exception {
         mvc.perform(get("/api/packages/300/bundles")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void issueLicenseWithoutAuthority() throws Exception {
+        mvc.perform(post("/api/packages/300/licenses")
+                .content(new ObjectMapper().writeValueAsString(LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithUserDetails
+    public void issueLicenseWithMemberAuthority() throws Exception {
+        mvc.perform(post("/api/packages/300/licenses")
+                .content(new ObjectMapper().writeValueAsString(LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isCreated());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void issueLicenseWithNonMemberAuthority() throws Exception {
+        mvc.perform(post("/api/packages/300/licenses")
+                .content(new ObjectMapper().writeValueAsString(LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void issueLicenseWithProductAuthority() throws Exception {
+        mvc.perform(post("/api/packages/300/licenses")
+                .content(new ObjectMapper().writeValueAsString(LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void getLicensesWithoutAuthority() throws Exception {
+        mvc.perform(get("/api/packages/300/licenses")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithUserDetails
+    public void getLicensesWithMemberAuthority() throws Exception {
+        mvc.perform(get("/api/packages/300/licenses")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void getLicensesWithNonMemberAuthority() throws Exception {
+        mvc.perform(get("/api/packages/300/licenses")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void getLicensesWithProductAuthority() throws Exception {
+        mvc.perform(get("/api/packages/300/licenses")).andExpect(status().isForbidden());
     }
 
 }

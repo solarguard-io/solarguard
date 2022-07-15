@@ -9,10 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.silentsoft.solarguard.core.config.oas.expression.Response;
 import org.silentsoft.solarguard.core.config.security.expression.Authority;
 import org.silentsoft.solarguard.entity.BundleEntity;
+import org.silentsoft.solarguard.entity.LicenseEntity;
 import org.silentsoft.solarguard.entity.PackageEntity;
 import org.silentsoft.solarguard.service.PackageService;
+import org.silentsoft.solarguard.vo.LicensePostVO;
 import org.silentsoft.solarguard.vo.PackagePatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -80,6 +83,29 @@ public class PackageController {
     })
     public ResponseEntity<?> getBundles(@PathVariable("packageId") long packageId) {
         return ResponseEntity.ok(packageService.getBundles(packageId));
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @PostMapping(path = "/{packageId}/licenses", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.CREATED, content = @Content(schema = @Schema(implementation = LicenseEntity.class))),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.PACKAGE_IS_NOT_EXISTS),
+            @ApiResponse(responseCode = Response.Code.UNPROCESSABLE_ENTITY, description = Response.Description.FAILED_TO_ISSUE_LICENSE)
+    })
+    public ResponseEntity<?> issueLicense(@PathVariable("packageId") long packageId, @RequestBody LicensePostVO licensePostVO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(packageService.issueLicense(packageId, licensePostVO));
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @GetMapping(path = "/{packageId}/licenses", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.OK, content = @Content(array = @ArraySchema(schema = @Schema(implementation = LicenseEntity.class)))),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.PACKAGE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> getLicenses(@PathVariable("packageId") long packageId) {
+        return ResponseEntity.ok(packageService.getLicenses(packageId));
     }
 
 }

@@ -10,6 +10,8 @@ import java.util.List;
 @Repository
 public interface LicenseRepository extends JpaRepository<LicenseEntity, Long> {
 
+    List<LicenseEntity> findAllBy_package(PackageEntity _package);
+
     LicenseEntity findBy_packageInAndKey(List<PackageEntity> packages, String key);
 
     LicenseEntity findByKey(String key);

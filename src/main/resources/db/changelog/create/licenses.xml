@@ -19,7 +19,10 @@
                 <constraints nullable="false"/>
             </column>
             <column name="expired_at" type="date"/>
-            <column defaultValueNumeric="0" name="device_limit" type="BIGINT"/>
+            <column defaultValueBoolean="false" name="is_device_limited" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="device_limit" type="BIGINT"/>
             <column name="note" type="VARCHAR"/>
             <column defaultValueBoolean="false" name="is_revoked" type="BOOLEAN">
                 <constraints nullable="false"/>
