@@ -21,8 +21,8 @@ public class JwtTokenUtil {
     private String secret;
 
     public enum TokenType {
-        LOGIN_ACCESS_TOKEN(1, 1000 * 60 * 15),               // 15 minutes
-        LOGIN_REFRESH_TOKEN(2, 1000 * 60 * 60 * 24 * 7 * 8), // 8  weeks
+        LOGIN_ACCESS_TOKEN(1, 1000L * 60 * 15),               // 15 minutes
+        LOGIN_REFRESH_TOKEN(2, 1000L * 60 * 60 * 24 * 7 * 8), // 8  weeks
         PERSONAL_ACCESS_TOKEN(3, Long.MAX_VALUE),
         PRODUCT_ACCESS_TOKEN(4, Long.MAX_VALUE);
 
