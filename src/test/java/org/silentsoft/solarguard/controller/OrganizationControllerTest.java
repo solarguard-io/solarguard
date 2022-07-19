@@ -166,6 +166,41 @@ public class OrganizationControllerTest {
     }
 
     @Test
+    public void deleteOrganizationWithoutAuthority() throws Exception {
+        mvc.perform(delete("/api/organizations/{organizationId}", "100")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void deleteOrganizationWithProductAuthority() throws Exception {
+        mvc.perform(delete("/api/organizations/{organizationId}", "100")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void deleteOrganizationWithMemberAuthority() throws Exception {
+        mvc.perform(delete("/api/organizations/{organizationId}", "100")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test1")
+    public void deleteOrganizationWithNonMemberAuthority() throws Exception {
+        mvc.perform(delete("/api/organizations/{organizationId}", "100")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("admin")
+    public void deleteOrganizationWithStaffAuthority() throws Exception {
+        mvc.perform(post("/api/organizations")
+                .content(new ObjectMapper().writeValueAsString(OrganizationPostVO.builder().name("Test Organization").build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isCreated()).andDo(result -> {
+            OrganizationEntity organization = new ObjectMapper().readValue(result.getResponse().getContentAsString(), OrganizationEntity.class);
+            mvc.perform(delete("/api/organizations/{organizationId}", organization.getId())).andExpect(status().isNoContent());
+        });
+    }
+
+    @Test
     public void getMembersWithoutAuthority() throws Exception {
         mvc.perform(get("/api/organizations/{organizationId}/members", "100")).andExpect(status().isUnauthorized());
     }

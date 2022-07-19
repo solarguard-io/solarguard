@@ -11,6 +11,7 @@ import org.silentsoft.solarguard.vo.ProductTokenPatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -63,10 +64,11 @@ public class ProductTokenService {
     }
 
     @PreAuthorize(Authority.Allow.BROWSER_API)
+    @Transactional
     public void deleteProductToken(long productTokenId) {
         checkStaffAuthority(productTokenId);
 
-        productTokenStatisticsRepository.deleteAllById_ProductTokenId(productTokenId);
+        productTokenStatisticsRepository.deleteAllByProductTokenId(productTokenId);
         productTokenRepository.deleteById(productTokenId);
     }
 

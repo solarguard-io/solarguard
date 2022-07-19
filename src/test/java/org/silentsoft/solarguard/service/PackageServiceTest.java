@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.silentsoft.solarguard.entity.LicenseEntity;
 import org.silentsoft.solarguard.entity.LicenseType;
 import org.silentsoft.solarguard.entity.PackageEntity;
+import org.silentsoft.solarguard.exception.PackageNotFoundException;
 import org.silentsoft.solarguard.vo.LicensePostVO;
 import org.silentsoft.solarguard.vo.PackagePatchVO;
 import org.silentsoft.solarguard.vo.PackagePostVO;
@@ -48,19 +49,34 @@ public class PackageServiceTest {
     @Test
     @WithUserDetails("admin")
     public void dataIntegrityTest() {
-        long packageId = organizationService.addPackage(100, PackagePostVO.builder().name("PackageServiceTest.dataIntegrityTest.package.1").productIds(Arrays.asList(200L)).build()).getId();
+        long packageId = organizationService.addPackage(100, PackagePostVO.builder().name(" PackageServiceTest.dataIntegrityTest.package.1 ").productIds(Arrays.asList(200L)).build()).getId();
 
         PackageEntity packageEntity = packageService.getPackage(packageId);
         Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.1", packageEntity.getName());
         Assertions.assertEquals(1, packageService.getBundles(packageId).size());
 
-        packageEntity = packageService.patchPackage(packageId, PackagePatchVO.builder().name("PackageServiceTest.dataIntegrityTest.package.2").productIds(Arrays.asList(200L, 201L)).build());
+        packageService.patchPackage(packageId, PackagePatchVO.builder().productIds(Collections.emptyList()).build());
+        Assertions.assertEquals(0, packageService.getBundles(packageId).size());
+
+        packageEntity = packageService.patchPackage(packageId, PackagePatchVO.builder().name(" PackageServiceTest.dataIntegrityTest.package.2 ").productIds(Arrays.asList(200L, 201L)).build());
         Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.2", packageEntity.getName());
         Assertions.assertEquals(2, packageService.getBundles(packageId).size());
 
-        packageEntity = packageService.patchPackage(packageId, PackagePatchVO.builder().productIds(Collections.emptyList()).build());
-        Assertions.assertEquals("PackageServiceTest.dataIntegrityTest.package.2", packageEntity.getName());
-        Assertions.assertEquals(0, packageService.getBundles(packageId).size());
+        packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).build());
+        packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).build());
+        Assertions.assertEquals(2, packageService.getLicenses(packageId).size());
+
+        packageService.deletePackage(packageId);
+
+        Assertions.assertThrows(PackageNotFoundException.class, () -> {
+            packageService.getPackage(packageId);
+        });
+        Assertions.assertThrows(PackageNotFoundException.class, () -> {
+            packageService.getBundles(packageId);
+        });
+        Assertions.assertThrows(PackageNotFoundException.class, () -> {
+            packageService.getLicenses(packageId);
+        });
     }
 
     @Test

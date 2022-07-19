@@ -4,8 +4,10 @@ import org.silentsoft.solarguard.core.config.security.expression.Authority;
 import org.silentsoft.solarguard.entity.ProductEntity;
 import org.silentsoft.solarguard.entity.ProductTokenEntity;
 import org.silentsoft.solarguard.exception.ProductNotFoundException;
+import org.silentsoft.solarguard.repository.BundleRepository;
 import org.silentsoft.solarguard.repository.ProductRepository;
 import org.silentsoft.solarguard.repository.ProductTokenRepository;
+import org.silentsoft.solarguard.repository.ProductTokenStatisticsRepository;
 import org.silentsoft.solarguard.util.JwtTokenUtil;
 import org.silentsoft.solarguard.util.OrganizationUtil;
 import org.silentsoft.solarguard.util.UserUtil;
@@ -14,10 +16,12 @@ import org.silentsoft.solarguard.vo.ProductTokenPostVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -33,6 +37,12 @@ public class ProductService {
 
     @Autowired
     private ProductTokenRepository productTokenRepository;
+
+    @Autowired
+    private ProductTokenStatisticsRepository productTokenStatisticsRepository;
+
+    @Autowired
+    private BundleRepository bundleRepository;
 
     @PreAuthorize(Authority.Has.Admin)
     public List<ProductEntity> getProducts() {
@@ -50,12 +60,12 @@ public class ProductService {
     public ProductEntity patchProduct(long productId, ProductPatchVO product) {
         checkStaffAuthority(productId);
 
-        if (!StringUtils.hasLength(product.getName())) {
+        if (!StringUtils.hasText(product.getName())) {
             throw new IllegalArgumentException("Product name is required.");
         }
 
         ProductEntity entity = findProduct(productId);
-        entity.setName(product.getName());
+        entity.setName(product.getName().trim());
         entity.setUpdatedBy(UserUtil.getId());
         entity.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         entity = productRepository.save(entity);
@@ -63,10 +73,17 @@ public class ProductService {
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @Transactional
     public void deleteProduct(long productId) {
         checkStaffAuthority(productId);
 
-        throw new UnsupportedOperationException("Not implemented yet.");
+        bundleRepository.deleteAllByProductId(productId);
+
+        List<Long> productTokenIds = productTokenRepository.findAllByProductId(productId).stream().map(ProductTokenEntity::getId).collect(Collectors.toList());
+        productTokenStatisticsRepository.deleteAllByProductTokenIdIn(productTokenIds);
+        productTokenRepository.deleteAllByIdInBatch(productTokenIds);
+
+        productRepository.deleteById(productId);
     }
 
     @PreAuthorize(Authority.Allow.BROWSER_API)
@@ -80,7 +97,7 @@ public class ProductService {
     public ProductTokenEntity createToken(long productId, ProductTokenPostVO productToken) {
         checkStaffAuthority(productId);
 
-        if (!StringUtils.hasLength(productToken.getNote())) {
+        if (!StringUtils.hasText(productToken.getNote())) {
             throw new IllegalArgumentException("Token note is required.");
         }
 
@@ -89,7 +106,7 @@ public class ProductService {
         ProductTokenEntity entity = new ProductTokenEntity();
         entity.setProduct(productRepository.getById(productId));
         entity.setAccessToken(jwtTokenUtil.generateProductAccessToken(productId));
-        entity.setNote(productToken.getNote());
+        entity.setNote(productToken.getNote().trim());
         entity.setIsRevoked(false);
         entity.setCreatedBy(userId);
         entity.setUpdatedBy(userId);

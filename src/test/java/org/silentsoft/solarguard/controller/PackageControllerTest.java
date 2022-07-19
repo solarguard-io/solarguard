@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.silentsoft.solarguard.context.support.WithProduct;
 import org.silentsoft.solarguard.entity.LicenseType;
+import org.silentsoft.solarguard.entity.PackageEntity;
 import org.silentsoft.solarguard.vo.LicensePostVO;
 import org.silentsoft.solarguard.vo.PackagePatchVO;
+import org.silentsoft.solarguard.vo.PackagePostVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -130,6 +132,35 @@ public class PackageControllerTest {
                 .content(new ObjectMapper().writeValueAsString(PackagePatchVO.builder().name("A2 Package").build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void deletePackageWithoutAuthority() throws Exception {
+        mvc.perform(delete("/api/packages/300")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithUserDetails
+    public void deletePackageWithMemberAuthority() throws Exception {
+        mvc.perform(delete("/api/packages/300")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("admin")
+    public void deletePackageWithStaffAuthority() throws Exception {
+        mvc.perform(post("/api/organizations/{organizationId}/packages", "100")
+                .content(new ObjectMapper().writeValueAsString(PackagePostVO.builder().name("Awesome Package").productIds(Arrays.asList(200L, 201L)).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isCreated()).andDo(result -> {
+            PackageEntity packageEntity = new ObjectMapper().readValue(result.getResponse().getContentAsString(), PackageEntity.class);
+            mvc.perform(delete("/api/packages/{packageId}", packageEntity.getId())).andExpect(status().isNoContent());
+        });
+    }
+
+    @Test
+    @WithProduct(200)
+    public void deletePackageWithProductAuthority() throws Exception {
+        mvc.perform(delete("/api/packages/300")).andExpect(status().isForbidden());
     }
 
     @Test

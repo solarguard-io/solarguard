@@ -9,12 +9,14 @@ import org.silentsoft.solarguard.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class OrganizationService {
@@ -35,10 +37,22 @@ public class OrganizationService {
     private ProductRepository productRepository;
 
     @Autowired
+    private ProductTokenRepository productTokenRepository;
+
+    @Autowired
+    private ProductTokenStatisticsRepository productTokenStatisticsRepository;
+
+    @Autowired
     private PackageRepository packageRepository;
 
     @Autowired
     private BundleRepository bundleRepository;
+
+    @Autowired
+    private LicenseRepository licenseRepository;
+
+    @Autowired
+    private DeviceRepository deviceRepository;
 
     @PreAuthorize(Authority.Has.Admin)
     public List<OrganizationEntity> getOrganizations() {
@@ -49,7 +63,7 @@ public class OrganizationService {
     public OrganizationEntity getOrganization(long organizationId) {
         organizationUtil.checkMemberAuthority(organizationId);
 
-        return organizationRepository.findById(organizationId).get();
+        return organizationRepository.findById(organizationId).orElse(null);
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
@@ -59,7 +73,7 @@ public class OrganizationService {
         long userId = UserUtil.getId();
 
         OrganizationEntity entity = new OrganizationEntity();
-        entity.setName(organization.getName());
+        entity.setName(organization.getName().trim());
         entity.setCreatedBy(userId);
         entity.setUpdatedBy(userId);
         entity = organizationRepository.save(entity);
@@ -81,7 +95,7 @@ public class OrganizationService {
         checkOrganizationName(organization.getName());
 
         OrganizationEntity entity = getOrganization(organizationId);
-        entity.setName(organization.getName());
+        entity.setName(organization.getName().trim());
         entity.setUpdatedBy(UserUtil.getId());
         entity.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         entity = organizationRepository.save(entity);
@@ -90,11 +104,29 @@ public class OrganizationService {
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @Transactional
     public void deleteOrganization(long organizationId) {
         organizationUtil.checkStaffAuthority(organizationId);
 
-        // TODO delete all products, packages, bundles, etc.
-        throw new UnsupportedOperationException("Not implemented yet.");
+        List<PackageEntity> packages = packageRepository.findAllByOrganizationId(organizationId);
+        List<Long> packageIds = packages.stream().map(PackageEntity::getId).collect(Collectors.toList());
+        bundleRepository.deleteAllByPackageIdIn(packageIds);
+
+        List<Long> productIds = productRepository.findAllByOrganizationId(organizationId).stream().map(ProductEntity::getId).collect(Collectors.toList());
+        List<Long> productTokenIds = productTokenRepository.findAllByProductIdIn(productIds).stream().map(ProductTokenEntity::getId).collect(Collectors.toList());
+        productTokenStatisticsRepository.deleteAllByProductTokenIdIn(productTokenIds);
+        productTokenRepository.deleteAllByIdInBatch(productTokenIds);
+        productRepository.deleteAllByIdInBatch(productIds);
+
+        List<Long> licenseIds = licenseRepository.findAllBy_packageIn(packages).stream().map(LicenseEntity::getId).collect(Collectors.toList());
+        deviceRepository.deleteAllByLicenseIdIn(licenseIds);
+        licenseRepository.deleteAllByPackageIdIn(packageIds);
+
+        packageRepository.deleteAllByOrganizationId(organizationId);
+
+        organizationMemberRepository.deleteAllByOrganizationId(organizationId);
+
+        organizationRepository.deleteById(organizationId);
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
@@ -174,7 +206,7 @@ public class OrganizationService {
     public ProductEntity addProduct(long organizationId, ProductPostVO productPostVO) {
         organizationUtil.checkStaffAuthority(organizationId);
 
-        if (!StringUtils.hasLength(productPostVO.getName())) {
+        if (!StringUtils.hasText(productPostVO.getName())) {
             throw new IllegalArgumentException("Product name is required.");
         }
 
@@ -182,7 +214,7 @@ public class OrganizationService {
 
         ProductEntity entity = new ProductEntity();
         entity.setOrganization(getOrganization(organizationId));
-        entity.setName(productPostVO.getName());
+        entity.setName(productPostVO.getName().trim());
         entity.setCreatedBy(userId);
         entity.setUpdatedBy(userId);
         entity = productRepository.save(entity);
@@ -201,7 +233,7 @@ public class OrganizationService {
     public PackageEntity addPackage(long organizationId, PackagePostVO packagePostVO) {
         organizationUtil.checkStaffAuthority(organizationId);
 
-        if (!StringUtils.hasLength(packagePostVO.getName())) {
+        if (!StringUtils.hasText(packagePostVO.getName())) {
             throw new IllegalArgumentException("Package name is required.");
         }
 
@@ -234,7 +266,7 @@ public class OrganizationService {
 
         PackageEntity packageEntity = new PackageEntity();
         packageEntity.setOrganization(getOrganization(organizationId));
-        packageEntity.setName(packagePostVO.getName());
+        packageEntity.setName(packagePostVO.getName().trim());
         packageEntity.setCreatedBy(userId);
         packageEntity.setUpdatedBy(userId);
         packageEntity = packageRepository.save(packageEntity);
@@ -251,7 +283,7 @@ public class OrganizationService {
     }
 
     private void checkOrganizationName(String name) {
-        if (!StringUtils.hasLength(name)) {
+        if (!StringUtils.hasText(name)) {
             throw new IllegalArgumentException("Organization name is required.");
         }
     }

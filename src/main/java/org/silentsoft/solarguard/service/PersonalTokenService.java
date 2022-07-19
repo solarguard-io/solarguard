@@ -10,6 +10,7 @@ import org.silentsoft.solarguard.vo.PersonalTokenPatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -53,12 +54,13 @@ public class PersonalTokenService {
     }
 
     @PreAuthorize(Authority.Allow.BROWSER_API)
+    @Transactional
     public void deletePersonalToken(long personalTokenId) {
         PersonalTokenEntity personalToken = findPersonalToken(personalTokenId);
 
         UserUtil.checkIdentity(personalToken.getUser().getId());
 
-        personalTokenStatisticsRepository.deleteAllById_PersonalTokenId(personalTokenId);
+        personalTokenStatisticsRepository.deleteAllByPersonalTokenId(personalTokenId);
         personalTokenRepository.deleteById(personalTokenId);
     }
 
