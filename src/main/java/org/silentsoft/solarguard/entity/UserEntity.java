@@ -25,8 +25,6 @@ public class UserEntity {
 
     private Boolean isTemporaryPassword;
 
-    private Boolean isDeleted;
-
     @Enumerated(EnumType.STRING)
     private UserRole role;
 

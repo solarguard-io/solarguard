@@ -16,7 +16,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationService {
@@ -37,22 +36,10 @@ public class OrganizationService {
     private ProductRepository productRepository;
 
     @Autowired
-    private ProductTokenRepository productTokenRepository;
-
-    @Autowired
-    private ProductTokenStatisticsRepository productTokenStatisticsRepository;
-
-    @Autowired
     private PackageRepository packageRepository;
 
     @Autowired
     private BundleRepository bundleRepository;
-
-    @Autowired
-    private LicenseRepository licenseRepository;
-
-    @Autowired
-    private DeviceRepository deviceRepository;
 
     @PreAuthorize(Authority.Has.Admin)
     public List<OrganizationEntity> getOrganizations() {
@@ -108,24 +95,6 @@ public class OrganizationService {
     public void deleteOrganization(long organizationId) {
         organizationUtil.checkStaffAuthority(organizationId);
 
-        List<PackageEntity> packages = packageRepository.findAllByOrganizationId(organizationId);
-        List<Long> packageIds = packages.stream().map(PackageEntity::getId).collect(Collectors.toList());
-        bundleRepository.deleteAllByPackageIdIn(packageIds);
-
-        List<Long> productIds = productRepository.findAllByOrganizationId(organizationId).stream().map(ProductEntity::getId).collect(Collectors.toList());
-        List<Long> productTokenIds = productTokenRepository.findAllByProductIdIn(productIds).stream().map(ProductTokenEntity::getId).collect(Collectors.toList());
-        productTokenStatisticsRepository.deleteAllByProductTokenIdIn(productTokenIds);
-        productTokenRepository.deleteAllByIdInBatch(productTokenIds);
-        productRepository.deleteAllByIdInBatch(productIds);
-
-        List<Long> licenseIds = licenseRepository.findAllBy_packageIn(packages).stream().map(LicenseEntity::getId).collect(Collectors.toList());
-        deviceRepository.deleteAllByLicenseIdIn(licenseIds);
-        licenseRepository.deleteAllByPackageIdIn(packageIds);
-
-        packageRepository.deleteAllByOrganizationId(organizationId);
-
-        organizationMemberRepository.deleteAllByOrganizationId(organizationId);
-
         organizationRepository.deleteById(organizationId);
     }
 
@@ -143,7 +112,7 @@ public class OrganizationService {
         if (Objects.nonNull(organizationMemberPostVO.getUserIds())) {
             organizationMemberPostVO.getUserIds().remove(UserUtil.getId());
             organizationMemberPostVO.getUserIds().removeIf(Objects::isNull);
-            organizationMemberPostVO.getUserIds().removeIf(userId -> !userRepository.findByIdAndIsDeletedFalse(userId).isPresent());
+            organizationMemberPostVO.getUserIds().removeIf(userId -> !userRepository.findById(userId).isPresent());
         }
 
         if (organizationMemberPostVO.getUserIds() == null || organizationMemberPostVO.getUserIds().isEmpty()) {

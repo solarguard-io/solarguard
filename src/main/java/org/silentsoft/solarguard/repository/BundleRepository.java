@@ -20,12 +20,4 @@ public interface BundleRepository extends JpaRepository<BundleEntity, BundleId> 
     @Query("delete from bundles where id.packageId = :packageId")
     void deleteAllByPackageId(long packageId);
 
-    @Modifying
-    @Query("delete from bundles where id.productId = :productId")
-    void deleteAllByProductId(long productId);
-
-    @Modifying
-    @Query("delete from bundles where id.packageId in :packageIds")
-    void deleteAllByPackageIdIn(List<Long> packageIds);
-
 }

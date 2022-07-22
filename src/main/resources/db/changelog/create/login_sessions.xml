@@ -29,6 +29,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addForeignKeyConstraint baseColumnNames="login_token_id" baseTableName="login_sessions" constraintName="login_sessions_login_token_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="login_tokens" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="login_token_id" baseTableName="login_sessions" constraintName="login_sessions_login_token_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="login_tokens" validate="true"/>
     </changeSet>
 </databaseChangeLog>

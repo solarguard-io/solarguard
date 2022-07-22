@@ -60,7 +60,6 @@ public class PersonalTokenService {
 
         UserUtil.checkIdentity(personalToken.getUser().getId());
 
-        personalTokenStatisticsRepository.deleteAllByPersonalTokenId(personalTokenId);
         personalTokenRepository.deleteById(personalTokenId);
     }
 

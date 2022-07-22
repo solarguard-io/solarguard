@@ -17,9 +17,6 @@
             <column defaultValueBoolean="true" name="is_temporary_password" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column defaultValueBoolean="false" name="is_deleted" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
             <column defaultValue="user" name="role" type="ENUM('USER', 'ADMIN')">
                 <constraints nullable="false"/>
             </column>

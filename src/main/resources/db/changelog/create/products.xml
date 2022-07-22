@@ -31,6 +31,6 @@
         <createIndex indexName="products_organization_id_idx" tableName="products">
             <column name="organization_id"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="products" constraintName="products_organization_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="organizations" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="products" constraintName="products_organization_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="organizations" validate="true"/>
     </changeSet>
 </databaseChangeLog>

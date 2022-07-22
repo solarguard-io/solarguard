@@ -4,10 +4,8 @@ import org.silentsoft.solarguard.core.config.security.expression.Authority;
 import org.silentsoft.solarguard.entity.ProductEntity;
 import org.silentsoft.solarguard.entity.ProductTokenEntity;
 import org.silentsoft.solarguard.exception.ProductNotFoundException;
-import org.silentsoft.solarguard.repository.BundleRepository;
 import org.silentsoft.solarguard.repository.ProductRepository;
 import org.silentsoft.solarguard.repository.ProductTokenRepository;
-import org.silentsoft.solarguard.repository.ProductTokenStatisticsRepository;
 import org.silentsoft.solarguard.util.JwtTokenUtil;
 import org.silentsoft.solarguard.util.OrganizationUtil;
 import org.silentsoft.solarguard.util.UserUtil;
@@ -21,7 +19,6 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -37,12 +34,6 @@ public class ProductService {
 
     @Autowired
     private ProductTokenRepository productTokenRepository;
-
-    @Autowired
-    private ProductTokenStatisticsRepository productTokenStatisticsRepository;
-
-    @Autowired
-    private BundleRepository bundleRepository;
 
     @PreAuthorize(Authority.Has.Admin)
     public List<ProductEntity> getProducts() {
@@ -76,12 +67,6 @@ public class ProductService {
     @Transactional
     public void deleteProduct(long productId) {
         checkStaffAuthority(productId);
-
-        bundleRepository.deleteAllByProductId(productId);
-
-        List<Long> productTokenIds = productTokenRepository.findAllByProductId(productId).stream().map(ProductTokenEntity::getId).collect(Collectors.toList());
-        productTokenStatisticsRepository.deleteAllByProductTokenIdIn(productTokenIds);
-        productTokenRepository.deleteAllByIdInBatch(productTokenIds);
 
         productRepository.deleteById(productId);
     }

@@ -40,7 +40,7 @@ public class UserService {
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
     public List<UserEntity> getUsers() {
-        List<UserEntity> users = userRepository.findAllByIsDeletedFalse();
+        List<UserEntity> users = userRepository.findAll();
         for (UserEntity user : users) {
             hidePassword(user);
         }
@@ -53,7 +53,7 @@ public class UserService {
     }
 
     private UserEntity findUser(long userId) {
-        return userRepository.findByIdAndIsDeletedFalse(userId).orElseThrow(() -> new UserNotFoundException(String.format("The user '%d' does not exist.", userId)));
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(String.format("The user '%d' does not exist.", userId)));
     }
 
     @PreAuthorize(Authority.Has.Admin)
@@ -76,7 +76,6 @@ public class UserService {
         } else {
             entity.setIsTemporaryPassword(true);
         }
-        entity.setIsDeleted(false);
         entity.setRole(UserRole.USER);
         entity.setCreatedBy(UserUtil.getId());
         entity.setUpdatedBy(UserUtil.getId());
@@ -125,11 +124,7 @@ public class UserService {
             throw new IllegalArgumentException("You cannot delete your own account.");
         }
 
-        UserEntity entity = findUser(userId);
-        entity.setIsDeleted(true);
-        entity.setUpdatedBy(UserUtil.getId());
-        entity.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        userRepository.save(entity);
+        userRepository.deleteById(userId);
     }
 
     @PreAuthorize(Authority.Allow.BROWSER_API)

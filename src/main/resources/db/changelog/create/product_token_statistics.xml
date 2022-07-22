@@ -28,6 +28,6 @@
         <createIndex indexName="product_token_statistics_product_token_id_idx" tableName="product_token_statistics">
             <column name="product_token_id"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="product_token_id" baseTableName="product_token_statistics" constraintName="product_token_statistics_product_token_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="product_tokens" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="product_token_id" baseTableName="product_token_statistics" constraintName="product_token_statistics_product_token_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="product_tokens" validate="true"/>
     </changeSet>
 </databaseChangeLog>

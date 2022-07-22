@@ -11,8 +11,6 @@ public interface ProductTokenRepository extends JpaRepository<ProductTokenEntity
 
     List<ProductTokenEntity> findAllByProductId(long productId);
 
-    List<ProductTokenEntity> findAllByProductIdIn(List<Long> productIds);
-
     ProductTokenEntity findByProductIdAndAccessToken(long productId, String accessToken);
 
 }

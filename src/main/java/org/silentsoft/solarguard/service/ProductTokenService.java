@@ -4,7 +4,6 @@ import org.silentsoft.solarguard.core.config.security.expression.Authority;
 import org.silentsoft.solarguard.entity.ProductTokenEntity;
 import org.silentsoft.solarguard.exception.ProductTokenNotFoundException;
 import org.silentsoft.solarguard.repository.ProductTokenRepository;
-import org.silentsoft.solarguard.repository.ProductTokenStatisticsRepository;
 import org.silentsoft.solarguard.util.OrganizationUtil;
 import org.silentsoft.solarguard.util.UserUtil;
 import org.silentsoft.solarguard.vo.ProductTokenPatchVO;
@@ -22,9 +21,6 @@ public class ProductTokenService {
 
     @Autowired
     private ProductTokenRepository productTokenRepository;
-
-    @Autowired
-    private ProductTokenStatisticsRepository productTokenStatisticsRepository;
 
     @Autowired
     private OrganizationUtil organizationUtil;
@@ -68,7 +64,6 @@ public class ProductTokenService {
     public void deleteProductToken(long productTokenId) {
         checkStaffAuthority(productTokenId);
 
-        productTokenStatisticsRepository.deleteAllByProductTokenId(productTokenId);
         productTokenRepository.deleteById(productTokenId);
     }
 

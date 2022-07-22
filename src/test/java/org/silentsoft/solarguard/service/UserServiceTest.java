@@ -20,7 +20,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -131,10 +130,6 @@ public class UserServiceTest {
         Assertions.assertThrows(UserNotFoundException.class, () -> {
             userService.getUser(userId);
         });
-
-        Optional<UserEntity> optionalUser = userRepository.findById(userId);
-        Assertions.assertTrue(optionalUser.isPresent());
-        Assertions.assertTrue(optionalUser.get().getIsDeleted());
     }
 
     @Test

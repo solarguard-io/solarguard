@@ -45,7 +45,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
 
     @Override
     public boolean isAccountNonLocked() {
-        return !userEntity.getIsDeleted();
+        return true;
     }
 
     @Override

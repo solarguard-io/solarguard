@@ -43,6 +43,6 @@
             <column name="user_id"/>
             <column name="access_token"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_tokens" constraintName="login_tokens_user_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="login_tokens" constraintName="login_tokens_user_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
     </changeSet>
 </databaseChangeLog>

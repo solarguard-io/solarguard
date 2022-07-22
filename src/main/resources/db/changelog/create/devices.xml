@@ -27,6 +27,6 @@
         <createIndex indexName="devices_license_id_idx" tableName="devices">
             <column name="license_id"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="license_id" baseTableName="devices" constraintName="devices_license_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="licenses" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="license_id" baseTableName="devices" constraintName="devices_license_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="licenses" validate="true"/>
     </changeSet>
 </databaseChangeLog>

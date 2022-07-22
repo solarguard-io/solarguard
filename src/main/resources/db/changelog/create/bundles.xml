@@ -31,7 +31,7 @@
         <createIndex indexName="bundles_product_id_idx" tableName="bundles">
             <column name="product_id"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="package_id" baseTableName="bundles" constraintName="bundles_package_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="packages" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="product_id" baseTableName="bundles" constraintName="bundles_product_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="products" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="package_id" baseTableName="bundles" constraintName="bundles_package_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="packages" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="product_id" baseTableName="bundles" constraintName="bundles_product_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="products" validate="true"/>
     </changeSet>
 </databaseChangeLog>

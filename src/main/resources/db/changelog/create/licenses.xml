@@ -53,6 +53,6 @@
             <column name="package_id"/>
             <column name="key"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="package_id" baseTableName="licenses" constraintName="licenses_package_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="packages" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="package_id" baseTableName="licenses" constraintName="licenses_package_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="packages" validate="true"/>
     </changeSet>
 </databaseChangeLog>

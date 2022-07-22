@@ -3,7 +3,10 @@ package org.silentsoft.solarguard.service;
 import org.silentsoft.solarguard.core.config.security.expression.Authority;
 import org.silentsoft.solarguard.entity.*;
 import org.silentsoft.solarguard.exception.PackageNotFoundException;
-import org.silentsoft.solarguard.repository.*;
+import org.silentsoft.solarguard.repository.BundleRepository;
+import org.silentsoft.solarguard.repository.LicenseRepository;
+import org.silentsoft.solarguard.repository.PackageRepository;
+import org.silentsoft.solarguard.repository.ProductRepository;
 import org.silentsoft.solarguard.util.LicenseUtil;
 import org.silentsoft.solarguard.util.OrganizationUtil;
 import org.silentsoft.solarguard.util.UserUtil;
@@ -20,7 +23,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class PackageService {
@@ -36,9 +38,6 @@ public class PackageService {
 
     @Autowired
     private LicenseRepository licenseRepository;
-
-    @Autowired
-    private DeviceRepository deviceRepository;
 
     @Autowired
     private OrganizationUtil organizationUtil;
@@ -108,12 +107,6 @@ public class PackageService {
     @Transactional
     public void deletePackage(long packageId) {
         checkStaffAuthority(packageId);
-
-        bundleRepository.deleteAllByPackageId(packageId);
-
-        List<Long> licenseIds = licenseRepository.findAllBy_package(findPackage(packageId)).stream().map(LicenseEntity::getId).collect(Collectors.toList());
-        deviceRepository.deleteAllByLicenseIdIn(licenseIds);
-        licenseRepository.deleteAllByIdInBatch(licenseIds);
 
         packageRepository.deleteById(packageId);
     }
