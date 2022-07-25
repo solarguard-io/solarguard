@@ -46,20 +46,15 @@ public class LicenseService {
 
         LicenseEntity license = findLicense(key);
 
+        Timestamp now = new Timestamp(System.currentTimeMillis());
         DeviceEntity device = new DeviceEntity();
-        device.setId(new DeviceId(license.getId(), LicenseUtil.generateDeviceCode()));
+        device.setId(new DeviceId(license, LicenseUtil.generateDeviceCode()));
         device.setName(devicePostVO.getName().trim());
-        device.setActivationCount(0L);
+        device.setActivationCount(1L);
         device.setIsBanned(false);
+        device.setFirstActivatedAt(now);
+        device.setLastActivatedAt(now);
         return deviceRepository.save(device);
-    }
-
-    @PreAuthorize(Authority.Allow.PRODUCT_API)
-    public DeviceEntity getDevice(String key, String deviceCode) {
-        requireKey(key);
-        requireDeviceCode(deviceCode);
-
-        return findDevice(findLicense(key).getId(), deviceCode);
     }
 
     @PreAuthorize(Authority.Allow.PRODUCT_API)
@@ -72,12 +67,14 @@ public class LicenseService {
 
         LicenseEntity license = findLicense(key);
 
-        DeviceId deviceId = new DeviceId(license.getId(), deviceCode);
+        DeviceId deviceId = new DeviceId(license, deviceCode);
         DeviceEntity device = deviceRepository.findById(deviceId).orElseThrow(() -> new DeviceNotFoundException(String.format("The device '%s' under the license '%d' with key '%s' is not found.", deviceCode, license.getId(), license.getKey())));
         if (device.getIsBanned()) {
             throw new AccessDeniedException(String.format("The device '%s' under the license '%d' with key '%s' is banned.", deviceCode, license.getId(), license.getKey()));
         }
         device.setName(devicePatchVO.getName().trim());
+        device.setActivationCount(device.getActivationCount() + 1);
+        device.setLastActivatedAt(new Timestamp(System.currentTimeMillis()));
         return deviceRepository.save(device);
     }
 
@@ -86,26 +83,7 @@ public class LicenseService {
         requireKey(key);
         requireDeviceCode(deviceCode);
 
-        deviceRepository.delete(findDevice(findLicense(key).getId(), deviceCode));
-    }
-
-    @PreAuthorize(Authority.Allow.PRODUCT_API)
-    public LicenseEntity activate(String key, String deviceCode) {
-        requireKey(key);
-        requireDeviceCode(deviceCode);
-
-        LicenseEntity license = findLicense(key);
-
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        DeviceEntity device = findDevice(license.getId(), deviceCode);
-        device.setActivationCount(device.getActivationCount() + 1);
-        if (device.getFirstActivatedAt() == null) {
-            device.setFirstActivatedAt(now);
-        }
-        device.setLastActivatedAt(now);
-        deviceRepository.save(device);
-
-        return license;
+        deviceRepository.delete(findDevice(findLicense(key), deviceCode));
     }
 
     private void requireKey(String key) {
@@ -151,11 +129,11 @@ public class LicenseService {
         return license;
     }
 
-    private DeviceEntity findDevice(long licenseId, String code) {
-        DeviceId deviceId = new DeviceId(licenseId, code);
-        DeviceEntity device = deviceRepository.findById(deviceId).orElseThrow(() -> new DeviceNotFoundException(String.format("The device '%s' under the license '%d' is not found.", code, licenseId)));
+    private DeviceEntity findDevice(LicenseEntity license, String code) {
+        DeviceId deviceId = new DeviceId(license, code);
+        DeviceEntity device = deviceRepository.findById(deviceId).orElseThrow(() -> new DeviceNotFoundException(String.format("The device '%s' under the license '%d' is not found.", code, license.getId())));
         if (device.getIsBanned()) {
-            throw new AccessDeniedException(String.format("The device '%s' under the license '%d' is banned.", code, licenseId));
+            throw new AccessDeniedException(String.format("The device '%s' under the license '%d' is banned.", code, license.getId()));
         }
         return device;
     }
