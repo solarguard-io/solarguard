@@ -8,7 +8,6 @@ import org.silentsoft.solarguard.entity.PersonalTokenEntity;
 import org.silentsoft.solarguard.entity.UserEntity;
 import org.silentsoft.solarguard.entity.UserRole;
 import org.silentsoft.solarguard.exception.UserNotFoundException;
-import org.silentsoft.solarguard.repository.UserRepository;
 import org.silentsoft.solarguard.util.JwtTokenUtil;
 import org.silentsoft.solarguard.vo.PersonalTokenPostVO;
 import org.silentsoft.solarguard.vo.UserPatchVO;
@@ -16,6 +15,7 @@ import org.silentsoft.solarguard.vo.UserPostVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -29,7 +29,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -107,7 +107,7 @@ public class UserServiceTest {
         UserEntity user = userService.createUser(UserPostVO.builder().username("dataIntegrityTest").password("HelloWorld").build());
         final long userId = user.getId();
         Assertions.assertEquals("dataIntegrityTest", user.getUsername());
-        Assertions.assertNull(user.getPassword());
+        Assertions.assertTrue(passwordEncoder.matches("HelloWorld", user.getPassword()));
         Assertions.assertNull(user.getEmail());
         Assertions.assertEquals(UserRole.USER, user.getRole());
         Assertions.assertEquals(1, user.getCreatedBy());
@@ -120,7 +120,7 @@ public class UserServiceTest {
                 .role(UserRole.ADMIN)
                 .build());
         Assertions.assertEquals("dataIntegrityTest2", user.getUsername());
-        Assertions.assertNull(user.getPassword());
+        Assertions.assertTrue(passwordEncoder.matches("HelloWorld2", user.getPassword()));
         Assertions.assertEquals("dataIntegrityTest2@solarguard.io", user.getEmail());
         Assertions.assertEquals(UserRole.ADMIN, user.getRole());
         Assertions.assertEquals(1, user.getUpdatedBy());

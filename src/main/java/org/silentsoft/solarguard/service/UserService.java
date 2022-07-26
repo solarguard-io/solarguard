@@ -40,16 +40,12 @@ public class UserService {
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
     public List<UserEntity> getUsers() {
-        List<UserEntity> users = userRepository.findAll();
-        for (UserEntity user : users) {
-            hidePassword(user);
-        }
-        return users;
+        return userRepository.findAll();
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
     public UserEntity getUser(long userId) {
-        return hidePassword(findUser(userId));
+        return findUser(userId);
     }
 
     private UserEntity findUser(long userId) {
@@ -79,9 +75,7 @@ public class UserService {
         entity.setRole(UserRole.USER);
         entity.setCreatedBy(UserUtil.getId());
         entity.setUpdatedBy(UserUtil.getId());
-        entity = userRepository.save(entity);
-
-        return hidePassword(entity);
+        return userRepository.save(entity);
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)
@@ -113,9 +107,7 @@ public class UserService {
         }
         entity.setUpdatedBy(UserUtil.getId());
         entity.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        entity = userRepository.save(entity);
-
-        return hidePassword(entity);
+        return userRepository.save(entity);
     }
 
     @PreAuthorize(Authority.Has.Admin)
@@ -182,13 +174,6 @@ public class UserService {
         if (StringUtils.hasLength(email) && userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already exists.");
         }
-    }
-
-    private UserEntity hidePassword(UserEntity userEntity) {
-        if (userEntity != null) {
-            userEntity.setPassword(null);
-        }
-        return userEntity;
     }
 
 }
