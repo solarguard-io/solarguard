@@ -1,23 +1,29 @@
 package org.silentsoft.solarguard.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Embeddable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
 public class BundleId implements Serializable {
 
-    private long packageId;
+    @OneToOne
+    @JoinColumn(name = "package_id")
+    @Accessors(prefix = "_")
+    private PackageEntity _package;
 
-    private long productId;
-
-    public BundleId(long packageId, long productId) {
-        this.packageId = packageId;
-        this.productId = productId;
-    }
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private ProductEntity product;
 
 }

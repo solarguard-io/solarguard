@@ -103,11 +103,11 @@ public class LicenseService {
     private LicenseEntity findLicense(String key) {
         long productId = (long) ThreadLocalHolder.get(ThreadLocalKeys.PRODUCT_ID);
 
-        List<BundleEntity> bundles = bundleRepository.findAllById_ProductId(productId);
+        List<BundleEntity> bundles = bundleRepository.findAllByProductId(productId);
         if (bundles.isEmpty()) {
             throw new PackageNotFoundException(String.format("No package found for the product '%d'.", productId));
         }
-        List<Long> packageIds = bundles.stream().map(BundleEntity::getId).map(BundleId::getPackageId).collect(Collectors.toList());
+        List<Long> packageIds = bundles.stream().map(BundleEntity::getId).map(BundleId::getPackage).map(PackageEntity::getId).collect(Collectors.toList());
         List<PackageEntity> packages = packageRepository.findAllById(packageIds);
 
         LicenseEntity license = licenseRepository.findBy_packageInAndKey(packages, key);

@@ -89,11 +89,11 @@ public class PackageService {
                 throw new IllegalArgumentException("Some products are not owned by this organization.");
             }
 
-            bundleRepository.deleteAllByPackageId(packageId);
+            bundleRepository.deleteAllByPackage(packageEntity);
 
             for (ProductEntity product : products) {
                 BundleEntity bundle = new BundleEntity();
-                bundle.setId(new BundleId(packageEntity.getId(), product.getId()));
+                bundle.setId(new BundleId(packageEntity, product));
                 bundle.setCreatedBy(userId);
                 bundle.setUpdatedBy(userId);
                 bundleRepository.save(bundle);
@@ -115,7 +115,7 @@ public class PackageService {
     public List<BundleEntity> getBundles(long packageId) {
         checkMemberAuthority(packageId);
 
-        return bundleRepository.findAllById_PackageId(packageId);
+        return bundleRepository.findAllByPackageId(packageId);
     }
 
     @PreAuthorize(Authority.Deny.PRODUCT_API)

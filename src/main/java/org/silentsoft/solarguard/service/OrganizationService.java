@@ -242,7 +242,7 @@ public class OrganizationService {
 
         for (ProductEntity product : products) {
             BundleEntity bundle = new BundleEntity();
-            bundle.setId(new BundleId(packageEntity.getId(), product.getId()));
+            bundle.setId(new BundleId(packageEntity, product));
             bundle.setCreatedBy(userId);
             bundle.setUpdatedBy(userId);
             bundleRepository.save(bundle);

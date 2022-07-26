@@ -44,8 +44,8 @@ public class OrganizationServiceTest {
 
         List<BundleEntity> bundles = packageService.getBundles(packageEntity.getId());
         Assertions.assertEquals(2, bundles.size());
-        Assertions.assertEquals(200L, bundles.get(0).getId().getProductId());
-        Assertions.assertEquals(201L, bundles.get(1).getId().getProductId());
+        Assertions.assertEquals(200L, bundles.get(0).getId().getProduct().getId());
+        Assertions.assertEquals(201L, bundles.get(1).getId().getProduct().getId());
     }
 
     @Test

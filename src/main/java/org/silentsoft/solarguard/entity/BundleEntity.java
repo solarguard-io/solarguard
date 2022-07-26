@@ -1,7 +1,9 @@
 package org.silentsoft.solarguard.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Delegate;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.EmbeddedId;
@@ -16,6 +18,8 @@ import java.sql.Timestamp;
 public class BundleEntity implements Serializable {
 
     @EmbeddedId
+    @Delegate
+    @JsonIgnore
     private BundleId id;
 
     private Timestamp createdAt;
