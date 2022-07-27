@@ -100,4 +100,24 @@ public class LicenseServiceTest {
         });
     }
 
+    @Test
+    @WithProduct(200)
+    public void deleteDeviceThatDeviceLimitExceededLicenseTest() {
+        String key = "TEST1-00002-YJCCY-TDWC6-MXE4X";
+        DeviceEntity device = licenseService.addDevice(key, DevicePostVO.builder().name("MacBook-Pro").build());
+        String deviceCode = device.getId().getCode();
+        Assertions.assertThrows(LicenseDeviceLimitExceededException.class, () -> {
+            licenseService.addDevice(key, DevicePostVO.builder().name("MacBook-Air").build());
+        });
+        Assertions.assertDoesNotThrow(() -> {
+            licenseService.deleteDevice(key, deviceCode);
+        });
+        Assertions.assertThrows(DeviceNotFoundException.class, () -> {
+            licenseService.deleteDevice(key, deviceCode);
+        });
+        Assertions.assertDoesNotThrow(() -> {
+            licenseService.addDevice(key, DevicePostVO.builder().name("MacBook-Air").build());
+        });
+    }
+
 }

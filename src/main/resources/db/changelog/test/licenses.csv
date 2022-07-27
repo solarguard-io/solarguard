@@ -13,3 +13,5 @@ id,package_id,key,type,expired_at,is_device_limited,device_limit,is_revoked,crea
 511,300,TEST1-00000-RRRRR-RRRRR-RRRRR,SUBSCRIPTION,9999-12-31,false,null,true,1,1
 512,300,TEST1-00000-DDDDD-DDDDD-DDDDD,PERPETUAL,null,true,2,false,1,1
 513,300,TEST1-00001-F6XNE-7HDDF-WTCP7,PERPETUAL,null,false,null,false,1,1
+514,300,TEST1-00002-YJCCY-TDWC6-MXE4X,PERPETUAL,null,true,1,false,1,1
+515,300,TEST1-00002-AEDXR-4PTK6-Y3J67,PERPETUAL,null,true,1,false,1,1

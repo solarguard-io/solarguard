@@ -45,6 +45,11 @@ public class LicenseService {
         }
 
         LicenseEntity license = findLicense(key);
+        if (license.getIsDeviceLimited()) {
+            if (license.getDeviceLimit() <= deviceRepository.countAllById_LicenseId(license.getId())) {
+                throw new LicenseDeviceLimitExceededException(String.format("The license key '%s' is limited to %d devices.", key, license.getDeviceLimit()));
+            }
+        }
 
         Timestamp now = new Timestamp(System.currentTimeMillis());
         DeviceEntity device = new DeviceEntity();
@@ -119,11 +124,6 @@ public class LicenseService {
         }
         if (license.getIsRevoked()) {
             throw new LicenseRevokedException(String.format("The license key '%s' is revoked.", key));
-        }
-        if (license.getIsDeviceLimited()) {
-            if (license.getDeviceLimit() <= deviceRepository.countAllById_LicenseId(license.getId())) {
-                throw new LicenseDeviceLimitExceededException(String.format("The license key '%s' is limited to %d devices.", key, license.getDeviceLimit()));
-            }
         }
 
         return license;

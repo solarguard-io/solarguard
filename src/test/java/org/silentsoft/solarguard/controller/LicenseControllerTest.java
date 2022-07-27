@@ -196,10 +196,10 @@ public class LicenseControllerTest {
     @Test
     @WithProduct(200)
     public void patchDeviceWithDeviceLimitExceededKeyWithProductAuthority() throws Exception {
-        mvc.perform(patch("/api/licenses/{key}/devices/{deviceCode}", "TEST1-00000-DDDDD-DDDDD-DDDDD", "JX7CHTKHJJ")
+        mvc.perform(patch("/api/licenses/{key}/devices/{deviceCode}", "TEST1-00000-DDDDD-DDDDD-DDDDD", "68PKNXBD6K")
                 .content(new ObjectMapper().writeValueAsString(DevicePatchVO.builder().name("MacBook-Pro").build()))
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isPaymentRequired());
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -282,7 +282,7 @@ public class LicenseControllerTest {
     @Test
     @WithProduct(200)
     public void deleteDeviceWithDeviceLimitExceededKeyWithProductAuthority() throws Exception {
-        mvc.perform(delete("/api/licenses/{key}/devices/{deviceCode}", "TEST1-00000-DDDDD-DDDDD-DDDDD", "CYADHF43DE")).andExpect(status().isPaymentRequired());
+        mvc.perform(delete("/api/licenses/{key}/devices/{deviceCode}", "TEST1-00002-AEDXR-4PTK6-Y3J67", "RWB847W4N3")).andExpect(status().isNoContent());
     }
 
     @Test
