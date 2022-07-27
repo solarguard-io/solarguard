@@ -1,6 +1,6 @@
 package org.silentsoft.solarguard.util;
 
-import org.silentsoft.solarguard.entity.OrganizationMemberId;
+import org.silentsoft.solarguard.entity.OrganizationMemberRole;
 import org.silentsoft.solarguard.exception.OrganizationNotFoundException;
 import org.silentsoft.solarguard.repository.OrganizationMemberRepository;
 import org.silentsoft.solarguard.repository.OrganizationRepository;
@@ -50,7 +50,7 @@ public class OrganizationUtil {
     }
 
     private boolean isMember(long organizationId) {
-        return organizationMemberRepository.existsById(new OrganizationMemberId(organizationId, UserUtil.getId()));
+        return organizationMemberRepository.existsById_OrganizationIdAndId_UserId(organizationId, UserUtil.getId());
     }
 
     private boolean isNotStaff(long organizationId) {
@@ -58,7 +58,7 @@ public class OrganizationUtil {
     }
 
     private boolean isStaff(long organizationId) {
-        return organizationMemberRepository.existsByIdAndRoleIsStaff(new OrganizationMemberId(organizationId, UserUtil.getId()));
+        return organizationMemberRepository.existsById_OrganizationIdAndId_UserIdAndRole(organizationId, UserUtil.getId(), OrganizationMemberRole.STAFF);
     }
 
 }
