@@ -70,13 +70,7 @@ public class LicenseService {
             throw new IllegalArgumentException("name is required");
         }
 
-        LicenseEntity license = findLicense(key);
-
-        DeviceId deviceId = new DeviceId(license, deviceCode);
-        DeviceEntity device = deviceRepository.findById(deviceId).orElseThrow(() -> new DeviceNotFoundException(String.format("The device '%s' under the license '%d' with key '%s' is not found.", deviceCode, license.getId(), license.getKey())));
-        if (device.getIsBanned()) {
-            throw new AccessDeniedException(String.format("The device '%s' under the license '%d' with key '%s' is banned.", deviceCode, license.getId(), license.getKey()));
-        }
+        DeviceEntity device = findDevice(findLicense(key), deviceCode);
         device.setName(devicePatchVO.getName().trim());
         device.setActivationCount(device.getActivationCount() + 1);
         device.setLastActivatedAt(new Timestamp(System.currentTimeMillis()));
