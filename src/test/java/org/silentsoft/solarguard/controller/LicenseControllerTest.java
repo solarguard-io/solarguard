@@ -1,20 +1,28 @@
 package org.silentsoft.solarguard.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.silentsoft.solarguard.context.support.WithBrowser;
 import org.silentsoft.solarguard.context.support.WithProduct;
+import org.silentsoft.solarguard.entity.LicenseEntity;
+import org.silentsoft.solarguard.entity.LicenseType;
 import org.silentsoft.solarguard.vo.DevicePatchVO;
 import org.silentsoft.solarguard.vo.DevicePostVO;
+import org.silentsoft.solarguard.vo.LicensePatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -307,6 +315,278 @@ public class LicenseControllerTest {
     @WithProduct(200)
     public void deleteDeviceWithProductAuthority() throws Exception {
         mvc.perform(delete("/api/licenses/{key}/devices/{deviceCode}", "TEST0-00000-X6DFC-8BAEM-8RPY3", "CYADHF43DE")).andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void getLicenseWithoutAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}", "500")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void getLicenseWithProductAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}", "500")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void getLicenseWithNonMemberAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}", "500")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void getLicenseWithMemberAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}", "500")).andExpect(status().isOk());
+    }
+
+    @Test
+    public void patchLicenseWithoutAuthority() throws Exception {
+        mvc.perform(patch("/api/licenses/{licenseId}", "500")
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void patchLicenseWithProductAuthority() throws Exception {
+        mvc.perform(patch("/api/licenses/{licenseId}", "500")
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void patchLicenseWithNonMemberAuthority() throws Exception {
+        mvc.perform(patch("/api/licenses/{licenseId}", "500")
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void patchLicenseWithMemberAuthority() throws Exception {
+        mvc.perform(patch("/api/licenses/{licenseId}", "999")
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/licenses/{licenseId}", "524")).andExpect(status().isOk()).andDo(result -> {
+            LicenseEntity license = new ObjectMapper().readValue(result.getResponse().getContentAsString(), LicenseEntity.class);
+            Assertions.assertEquals(LicenseType.PERPETUAL, license.getType());
+            Assertions.assertNull(license.getExpiredAt());
+            Assertions.assertFalse(license.getIsDeviceLimited());
+            Assertions.assertEquals(1, license.getDeviceLimit());
+            Assertions.assertNull(license.getNote());
+            Assertions.assertFalse(license.getIsRevoked());
+            Assertions.assertNull(license.getRevokedAt());
+            Assertions.assertNull(license.getRevokedBy());
+        });
+
+        mvc.perform(patch("/api/licenses/{licenseId}", "524")
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().licenseType(LicenseType.SUBSCRIPTION).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnprocessableEntity());
+        mvc.perform(patch("/api/licenses/{licenseId}", "524")
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().isDeviceLimited(true).deviceLimit(0L).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnprocessableEntity());
+
+        mvc.perform(patch("/api/licenses/{licenseId}", "524")
+                .content(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(LicensePatchVO.builder()
+                        .licenseType(LicenseType.SUBSCRIPTION)
+                        .expiredAt(LocalDate.of(9999, 12, 31))
+                        .isDeviceLimited(true)
+                        .deviceLimit(5L)
+                        .note(" patch ")
+                        .isRevoked(true)
+                        .build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+
+        mvc.perform(get("/api/licenses/{licenseId}", "524")).andExpect(status().isOk()).andDo(result -> {
+            LicenseEntity license = new ObjectMapper().readValue(result.getResponse().getContentAsString(), LicenseEntity.class);
+            Assertions.assertEquals(LicenseType.SUBSCRIPTION, license.getType());
+            Assertions.assertEquals(LocalDate.of(9999, 12, 31), license.getExpiredAt().toLocalDate());
+            Assertions.assertTrue(license.getIsDeviceLimited());
+            Assertions.assertEquals(5, license.getDeviceLimit());
+            Assertions.assertEquals("patch", license.getNote());
+            Assertions.assertTrue(license.getIsRevoked());
+            Assertions.assertNotNull(license.getRevokedBy());
+            Assertions.assertEquals(LocalDate.now(), license.getRevokedAt().toLocalDateTime().toLocalDate());
+        });
+
+        mvc.perform(patch("/api/licenses/{licenseId}", "524")
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().isRevoked(false).build()))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mvc.perform(get("/api/licenses/{licenseId}", "524")).andExpect(status().isOk()).andDo(result -> {
+            LicenseEntity license = new ObjectMapper().readValue(result.getResponse().getContentAsString(), LicenseEntity.class);
+            Assertions.assertFalse(license.getIsRevoked());
+            Assertions.assertNull(license.getRevokedAt());
+            Assertions.assertNull(license.getRevokedBy());
+        });
+    }
+
+    @Test
+    public void deleteLicenseWithoutAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}", "500")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void deleteLicenseWithProductAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}", "500")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void deleteLicenseWithNonMemberAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}", "500")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void deleteLicenseWithMemberAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}", "999")).andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/licenses/{licenseId}", "525")).andExpect(status().isOk());
+        mvc.perform(delete("/api/licenses/{licenseId}", "525")).andExpect(status().isNoContent());
+        mvc.perform(get("/api/licenses/{licenseId}", "525")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getDevicesAndGetDeviceWithoutAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "521")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void getDevicesAndGetDeviceWithProductAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "521")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void getDevicesAndGetDeviceWithNonMemberAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "521")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void getDevicesAndGetDeviceWithMemberAuthority() throws Exception {
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "999")).andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "521")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("8JXRYP6KAY"))
+                .andExpect(jsonPath("$[1].code").value("FJAE6M3HT3"));
+
+        mvc.perform(get("/api/licenses/{licenseId}/devices/{deviceCode}", "521", "8JXRYP6KAY")).andExpect(status().isOk());
+        mvc.perform(get("/api/licenses/{licenseId}/devices/{deviceCode}", "521", "FJAE6M3HT3")).andExpect(status().isOk());
+
+        mvc.perform(get("/api/licenses/{licenseId}/devices/{deviceCode}", "521", "FFFFFFFFFF")).andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/licenses/{licenseId}/devices/{deviceCode}", "521", " ")).andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void deleteDevicesWithoutAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}/devices", "522")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void deleteDevicesWithProductAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}/devices", "522")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void deleteDevicesWithNonMemberAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}/devices", "522")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void deleteDevicesWithMemberAuthority() throws Exception {
+        mvc.perform(delete("/api/licenses/{licenseId}/devices", "999")).andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "522")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("64MDWW74MA"))
+                .andExpect(jsonPath("$[1].code").value("4CWYTPEKK3"));
+        mvc.perform(delete("/api/licenses/{licenseId}/devices", "522")).andExpect(status().isNoContent());
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "522")).andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    public void banDeviceAndUnbanDeviceWithoutAuthority() throws Exception {
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isUnauthorized());
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithProduct(200)
+    public void banDeviceAndUnbanDeviceWithProductAuthority() throws Exception {
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isForbidden());
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("test3")
+    public void banDeviceAndUnbanDeviceWithNonMemberAuthority() throws Exception {
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isForbidden());
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails
+    public void banDeviceAndUnbanDeviceWithMemberAuthority() throws Exception {
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "999", "R3NYXPE883")).andExpect(status().isNotFound());
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "999", "R3NYXPE883")).andExpect(status().isNotFound());
+
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", " ")).andExpect(status().isUnprocessableEntity());
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", " ")).andExpect(status().isUnprocessableEntity());
+
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "FFFFFFFFFF")).andExpect(status().isNotFound());
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "FFFFFFFFFF")).andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "523")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("R3NYXPE883"))
+                .andExpect(jsonPath("$[0].isBanned").value("false"))
+                .andExpect(jsonPath("$[1].code").value("RXF8MPKYRH"))
+                .andExpect(jsonPath("$[1].isBanned").value("false"));
+
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isNoContent());
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "523")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("R3NYXPE883"))
+                .andExpect(jsonPath("$[0].isBanned").value("true"))
+                .andExpect(jsonPath("$[1].code").value("RXF8MPKYRH"))
+                .andExpect(jsonPath("$[1].isBanned").value("false"));
+
+        mvc.perform(put("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "RXF8MPKYRH")).andExpect(status().isNoContent());
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "523")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("R3NYXPE883"))
+                .andExpect(jsonPath("$[0].isBanned").value("true"))
+                .andExpect(jsonPath("$[1].code").value("RXF8MPKYRH"))
+                .andExpect(jsonPath("$[1].isBanned").value("true"));
+
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "R3NYXPE883")).andExpect(status().isNoContent());
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "523")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("R3NYXPE883"))
+                .andExpect(jsonPath("$[0].isBanned").value("false"))
+                .andExpect(jsonPath("$[1].code").value("RXF8MPKYRH"))
+                .andExpect(jsonPath("$[1].isBanned").value("true"));
+
+        mvc.perform(delete("/api/licenses/{licenseId}/devices/{deviceCode}/ban", "523", "RXF8MPKYRH")).andExpect(status().isNoContent());
+        mvc.perform(get("/api/licenses/{licenseId}/devices", "523")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("R3NYXPE883"))
+                .andExpect(jsonPath("$[0].isBanned").value("false"))
+                .andExpect(jsonPath("$[1].code").value("RXF8MPKYRH"))
+                .andExpect(jsonPath("$[1].isBanned").value("false"));
     }
 
 }

@@ -29,6 +29,8 @@ public class Response {
         public static final String PRODUCT_TOKEN_IS_NOT_EXISTS = RESPONSE_IF + "product token is not exists";
         public static final String PERSONAL_TOKEN_IS_NOT_EXISTS = RESPONSE_IF + "personal token is not exists";
         public static final String PACKAGE_IS_NOT_EXISTS = RESPONSE_IF + "package is not exists";
+        public static final String LICENSE_IS_NOT_EXISTS = RESPONSE_IF + "license is not exists";
+        public static final String LICENSE_OR_DEVICE_IS_NOT_EXISTS = RESPONSE_IF + "license or device is not exists";
         public static final String FAILED_TO_CREATE_USER = RESPONSE_IF + "failed to create user";
         public static final String FAILED_TO_EDIT_USER = RESPONSE_IF + "failed to edit user";
         public static final String FAILED_TO_DELETE_USER = RESPONSE_IF + "failed to delete user";
@@ -44,6 +46,7 @@ public class Response {
         public static final String FAILED_TO_UPDATE_PACKAGE = RESPONSE_IF + "failed to update package";
         public static final String FAILED_TO_CHECK_OR_ACTIVATE_LICENSE_KEY_OR_DEVICE_IS_BANNED = RESPONSE_IF + "failed to check or activate license key or device is banned";
         public static final String FAILED_TO_ISSUE_LICENSE = RESPONSE_IF + "failed to issue license";
+        public static final String FAILED_TO_UPDATE_LICENSE = RESPONSE_IF + "failed to update license";
         public static final String PRODUCT_CODE_OR_TOKEN_IS_INVALID = RESPONSE_IF + "product code or token is invalid";
         public static final String NO_LICENSE_PACKAGE_FOUND_CORRESPONDING_TO_THE_PRODUCT = RESPONSE_IF + "no license package found corresponding to the product";
         public static final String LICENSE_IS_EXPIRED_OR_REVOKED_OR_LIMITED = RESPONSE_IF + "license is expired or revoked or device limit exceeded";

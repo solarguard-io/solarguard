@@ -4,13 +4,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.silentsoft.solarguard.context.support.WithProduct;
 import org.silentsoft.solarguard.entity.DeviceEntity;
+import org.silentsoft.solarguard.entity.LicenseEntity;
+import org.silentsoft.solarguard.entity.LicenseType;
 import org.silentsoft.solarguard.exception.*;
+import org.silentsoft.solarguard.util.UserUtil;
 import org.silentsoft.solarguard.vo.DevicePatchVO;
 import org.silentsoft.solarguard.vo.DevicePostVO;
+import org.silentsoft.solarguard.vo.LicensePatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -117,6 +125,173 @@ public class LicenseServiceTest {
         });
         Assertions.assertDoesNotThrow(() -> {
             licenseService.addDevice(key, DevicePostVO.builder().name("MacBook-Air").build());
+        });
+    }
+
+    @Test
+    @WithUserDetails
+    public void getDevicesAndGetDeviceTest() {
+        Assertions.assertThrows(LicenseNotFoundException.class, () -> {
+            licenseService.getDevices(999);
+        });
+
+        List<DeviceEntity> devices = licenseService.getDevices(516);
+        Assertions.assertEquals(2, devices.size());
+        Assertions.assertTrue(devices.stream().anyMatch(device -> device.getId().getCode().equals("JAA3E43FWJ")));
+        Assertions.assertTrue(devices.stream().anyMatch(device -> device.getId().getCode().equals("BM7JCP8MYA")));
+
+        Assertions.assertNotNull(licenseService.getDevice(516, "JAA3E43FWJ"));
+        Assertions.assertNotNull(licenseService.getDevice(516, "BM7JCP8MYA"));
+
+        Assertions.assertThrows(DeviceNotFoundException.class, () -> {
+            licenseService.getDevice(516, "FFFFFFFFFF");
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.getDevice(516, null);
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.getDevice(516, "");
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.getDevice(516, " ");
+        });
+    }
+
+    @Test
+    @WithUserDetails
+    public void deleteDevicesTest() {
+        Assertions.assertThrows(LicenseNotFoundException.class, () -> {
+            licenseService.deleteDevices(999);
+        });
+
+        Assertions.assertEquals(2, licenseService.getDevices(517).size());
+        licenseService.deleteDevices(517);
+        Assertions.assertEquals(0, licenseService.getDevices(517).size());
+    }
+
+    @Test
+    @WithUserDetails
+    public void banDeviceAndUnbanDeviceTest() {
+        Assertions.assertThrows(LicenseNotFoundException.class, () -> {
+            licenseService.banDevice(999, "AR87FXWK4M");
+        });
+        Assertions.assertThrows(LicenseNotFoundException.class, () -> {
+            licenseService.unbanDevice(999, "AR87FXWK4M");
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.banDevice(518, null);
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.unbanDevice(518, null);
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.banDevice(518, "");
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.unbanDevice(518, "");
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.banDevice(518, " ");
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.unbanDevice(518, " ");
+        });
+        Assertions.assertThrows(DeviceNotFoundException.class, () -> {
+            licenseService.banDevice(518, "FFFFFFFFFF");
+        });
+        Assertions.assertThrows(DeviceNotFoundException.class, () -> {
+            licenseService.unbanDevice(518, "FFFFFFFFFF");
+        });
+
+        List<DeviceEntity> devices = licenseService.getDevices(518);
+        Assertions.assertEquals(2, devices.size());
+        Assertions.assertFalse(devices.get(0).getIsBanned());
+        Assertions.assertFalse(devices.get(1).getIsBanned());
+
+        licenseService.banDevice(518, "AR87FXWK4M");
+        devices = licenseService.getDevices(518);
+        Assertions.assertTrue(devices.get(0).getIsBanned());
+        Assertions.assertFalse(devices.get(1).getIsBanned());
+
+        licenseService.banDevice(518, "YJWXW4PNRB");
+        devices = licenseService.getDevices(518);
+        Assertions.assertTrue(devices.get(0).getIsBanned());
+        Assertions.assertTrue(devices.get(1).getIsBanned());
+
+        licenseService.unbanDevice(518, "AR87FXWK4M");
+        devices = licenseService.getDevices(518);
+        Assertions.assertFalse(devices.get(0).getIsBanned());
+        Assertions.assertTrue(devices.get(1).getIsBanned());
+
+        licenseService.unbanDevice(518, "YJWXW4PNRB");
+        devices = licenseService.getDevices(518);
+        Assertions.assertFalse(devices.get(0).getIsBanned());
+        Assertions.assertFalse(devices.get(1).getIsBanned());
+    }
+
+    @Test
+    @WithUserDetails
+    public void patchLicenseTest() {
+        Assertions.assertThrows(LicenseNotFoundException.class, () -> {
+            licenseService.patchLicense(999, LicensePatchVO.builder().build());
+        });
+
+        LicenseEntity license = licenseService.getLicense(519);
+        Assertions.assertEquals(LicenseType.PERPETUAL, license.getType());
+        Assertions.assertNull(license.getExpiredAt());
+        Assertions.assertFalse(license.getIsDeviceLimited());
+        Assertions.assertEquals(1, license.getDeviceLimit());
+        Assertions.assertNull(license.getNote());
+        Assertions.assertFalse(license.getIsRevoked());
+        Assertions.assertNull(license.getRevokedAt());
+        Assertions.assertNull(license.getRevokedBy());
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.patchLicense(519, LicensePatchVO.builder().licenseType(LicenseType.SUBSCRIPTION).build());
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            licenseService.patchLicense(519, LicensePatchVO.builder().isDeviceLimited(true).deviceLimit(0L).build());
+        });
+
+        licenseService.patchLicense(519, LicensePatchVO.builder()
+                        .licenseType(LicenseType.SUBSCRIPTION)
+                        .expiredAt(LocalDate.of(9999, 12, 31))
+                        .isDeviceLimited(true)
+                        .deviceLimit(5L)
+                        .note(" patch ")
+                        .isRevoked(true)
+                        .build()
+        );
+        license = licenseService.getLicense(519);
+        Assertions.assertEquals(LicenseType.SUBSCRIPTION, license.getType());
+        Assertions.assertEquals(LocalDate.of(9999, 12, 31), license.getExpiredAt().toLocalDate());
+        Assertions.assertTrue(license.getIsDeviceLimited());
+        Assertions.assertEquals(5, license.getDeviceLimit());
+        Assertions.assertEquals("patch", license.getNote());
+        Assertions.assertTrue(license.getIsRevoked());
+        Assertions.assertEquals(UserUtil.getId(), license.getRevokedBy());
+        Assertions.assertEquals(LocalDate.now(), license.getRevokedAt().toLocalDateTime().toLocalDate());
+
+        licenseService.patchLicense(519, LicensePatchVO.builder().isRevoked(false).build());
+        license = licenseService.getLicense(519);
+        Assertions.assertFalse(license.getIsRevoked());
+        Assertions.assertNull(license.getRevokedAt());
+        Assertions.assertNull(license.getRevokedBy());
+    }
+
+    @Test
+    @WithUserDetails
+    public void deleteLicenseTest() {
+        Assertions.assertThrows(LicenseNotFoundException.class, () -> {
+            licenseService.deleteLicense(999);
+        });
+        Assertions.assertDoesNotThrow(() -> {
+            licenseService.getLicense(520);
+        });
+        licenseService.deleteLicense(520);
+        Assertions.assertThrows(LicenseNotFoundException.class, () -> {
+            licenseService.getLicense(520);
         });
     }
 

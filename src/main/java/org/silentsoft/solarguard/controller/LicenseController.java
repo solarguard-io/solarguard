@@ -1,5 +1,6 @@
 package org.silentsoft.solarguard.controller;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,11 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.silentsoft.solarguard.core.config.oas.expression.Response;
 import org.silentsoft.solarguard.core.config.security.expression.Authority;
 import org.silentsoft.solarguard.entity.DeviceEntity;
+import org.silentsoft.solarguard.entity.LicenseEntity;
 import org.silentsoft.solarguard.exception.NotFoundException;
 import org.silentsoft.solarguard.exception.PackageNotFoundException;
 import org.silentsoft.solarguard.service.LicenseService;
 import org.silentsoft.solarguard.vo.DevicePatchVO;
 import org.silentsoft.solarguard.vo.DevicePostVO;
+import org.silentsoft.solarguard.vo.LicensePatchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -85,6 +88,99 @@ public class LicenseController {
         } catch (NotFoundException | IllegalArgumentException | AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @GetMapping(path = "/{licenseId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.OK, content = @Content(schema = @Schema(implementation = LicenseEntity.class))),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> getLicense(@PathVariable("licenseId") long licenseId) {
+        return ResponseEntity.ok(licenseService.getLicense(licenseId));
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @PatchMapping(path = "/{licenseId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.OK, content = @Content(schema = @Schema(implementation = LicenseEntity.class))),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_IS_NOT_EXISTS),
+            @ApiResponse(responseCode = Response.Code.UNPROCESSABLE_ENTITY, description = Response.Description.FAILED_TO_UPDATE_LICENSE)
+    })
+    public ResponseEntity<?> patchLicense(@PathVariable("licenseId") long licenseId, @RequestBody LicensePatchVO licensePatchVO) {
+        return ResponseEntity.ok(licenseService.patchLicense(licenseId, licensePatchVO));
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @DeleteMapping(path = "/{licenseId}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.NO_CONTENT),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> deleteLicense(@PathVariable("licenseId") long licenseId) {
+        licenseService.deleteLicense(licenseId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @GetMapping(path = "/{licenseId}/devices", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.OK, content = @Content(array = @ArraySchema(schema = @Schema(implementation = DeviceEntity.class)))),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> getDevices(@PathVariable("licenseId") long licenseId) {
+        return ResponseEntity.ok(licenseService.getDevices(licenseId));
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @GetMapping(path = "/{licenseId}/devices/{deviceCode}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.OK, content = @Content(schema = @Schema(implementation = DeviceEntity.class))),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_OR_DEVICE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> getDevice(@PathVariable("licenseId") long licenseId, @PathVariable("deviceCode") String deviceCode) {
+        return ResponseEntity.ok(licenseService.getDevice(licenseId, deviceCode));
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @DeleteMapping(path = "/{licenseId}/devices")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.NO_CONTENT),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> deleteDevices(@PathVariable("licenseId") long licenseId) {
+        licenseService.deleteDevices(licenseId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @PutMapping(path = "/{licenseId}/devices/{deviceCode}/ban")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.NO_CONTENT),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_OR_DEVICE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> banDevice(@PathVariable("licenseId") long licenseId, @PathVariable("deviceCode") String deviceCode) {
+        licenseService.banDevice(licenseId, deviceCode);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize(Authority.Deny.PRODUCT_API)
+    @DeleteMapping(path = "/{licenseId}/devices/{deviceCode}/ban")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = Response.Code.NO_CONTENT),
+            @ApiResponse(responseCode = Response.Code.FORBIDDEN, description = Response.Description.USER_IS_NOT_A_MEMBER_OF_ORGANIZATION),
+            @ApiResponse(responseCode = Response.Code.NOT_FOUND, description = Response.Description.LICENSE_OR_DEVICE_IS_NOT_EXISTS)
+    })
+    public ResponseEntity<?> unbanDevice(@PathVariable("licenseId") long licenseId, @PathVariable("deviceCode") String deviceCode) {
+        licenseService.unbanDevice(licenseId, deviceCode);
+        return ResponseEntity.noContent().build();
     }
 
 }
