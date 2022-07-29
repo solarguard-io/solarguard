@@ -251,16 +251,16 @@ public class LicenseServiceTest {
             licenseService.patchLicense(519, LicensePatchVO.builder().licenseType(LicenseType.SUBSCRIPTION).build());
         });
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            licenseService.patchLicense(519, LicensePatchVO.builder().isDeviceLimited(true).deviceLimit(0L).build());
+            licenseService.patchLicense(519, LicensePatchVO.builder().deviceLimited(true).deviceLimit(0L).build());
         });
 
         licenseService.patchLicense(519, LicensePatchVO.builder()
                         .licenseType(LicenseType.SUBSCRIPTION)
                         .expiredAt(LocalDate.of(9999, 12, 31))
-                        .isDeviceLimited(true)
+                        .deviceLimited(true)
                         .deviceLimit(5L)
                         .note(" patch ")
-                        .isRevoked(true)
+                        .revoke(true)
                         .build()
         );
         license = licenseService.getLicense(519);
@@ -273,7 +273,7 @@ public class LicenseServiceTest {
         Assertions.assertEquals(UserUtil.getId(), license.getRevokedBy());
         Assertions.assertEquals(LocalDate.now(), license.getRevokedAt().toLocalDateTime().toLocalDate());
 
-        licenseService.patchLicense(519, LicensePatchVO.builder().isRevoked(false).build());
+        licenseService.patchLicense(519, LicensePatchVO.builder().revoke(false).build());
         license = licenseService.getLicense(519);
         Assertions.assertFalse(license.getIsRevoked());
         Assertions.assertNull(license.getRevokedAt());

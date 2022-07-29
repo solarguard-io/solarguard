@@ -94,18 +94,18 @@ public class PackageServiceTest {
             packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now().minusDays(1)).build());
         });
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).build());
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).deviceLimited(true).build());
         });
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).deviceLimit(-1L).build());
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).deviceLimited(true).deviceLimit(-1L).build());
         });
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).deviceLimit(0L).build());
+            packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).deviceLimited(true).deviceLimit(0L).build());
         });
 
         Assertions.assertEquals(0, packageService.getLicenses(packageId).size());
 
-        LicenseEntity licenseEntity = packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).isDeviceLimited(true).deviceLimit(1L).note(" NOTE ").build());
+        LicenseEntity licenseEntity = packageService.issueLicense(packageId, LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now()).deviceLimited(true).deviceLimit(1L).note(" NOTE ").build());
 
         Assertions.assertEquals(1, packageService.getLicenses(packageId).size());
         Assertions.assertEquals(packageId, licenseEntity.getPackage().getId());

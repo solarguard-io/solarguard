@@ -20,7 +20,7 @@ public class LicensePatchVO {
     private LocalDate expiredAt;
 
     @Schema(nullable = true)
-    private Boolean isDeviceLimited;
+    private Boolean deviceLimited;
 
     @Schema(nullable = true)
     private Long deviceLimit;
@@ -29,6 +29,6 @@ public class LicensePatchVO {
     private String note;
 
     @Schema(nullable = true)
-    private Boolean isRevoked;
+    private Boolean revoke;
 
 }

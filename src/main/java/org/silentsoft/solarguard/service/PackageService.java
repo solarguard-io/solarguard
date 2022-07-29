@@ -132,7 +132,7 @@ public class PackageService {
                 throw new IllegalArgumentException("Expiration date must be after current date.");
             }
         }
-        if (licensePostVO.getIsDeviceLimited() != null && licensePostVO.getIsDeviceLimited()) {
+        if (licensePostVO.getDeviceLimited() != null && licensePostVO.getDeviceLimited()) {
             if (licensePostVO.getDeviceLimit() == null) {
                 throw new IllegalArgumentException("Device limit is required.");
             } else if (licensePostVO.getDeviceLimit() <= 0) {
@@ -147,8 +147,8 @@ public class PackageService {
         if (licensePostVO.getLicenseType() == LicenseType.SUBSCRIPTION) {
             licenseEntity.setExpiredAt(Date.valueOf(licensePostVO.getExpiredAt()));
         }
-        if (licensePostVO.getIsDeviceLimited() != null) {
-            licenseEntity.setIsDeviceLimited(licensePostVO.getIsDeviceLimited());
+        if (licensePostVO.getDeviceLimited() != null) {
+            licenseEntity.setIsDeviceLimited(licensePostVO.getDeviceLimited());
             licenseEntity.setDeviceLimit(licensePostVO.getDeviceLimit());
         }
         if (StringUtils.hasText(licensePostVO.getNote())) {

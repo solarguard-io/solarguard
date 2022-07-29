@@ -88,7 +88,7 @@ public class OrganizationServiceTest {
         LicenseEntity license2_1 = packageService.issueLicense(package2.getId(), LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).note(" License 2-1 ").build());
         LicenseEntity license2_2 = packageService.issueLicense(package2.getId(), LicensePostVO.builder().licenseType(LicenseType.PERPETUAL).note(" License 2-2 ").build());
         LicenseEntity license3_1 = packageService.issueLicense(package3.getId(), LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now().plusDays(1)).note(" License 3-1 ").build());
-        LicenseEntity license3_2 = packageService.issueLicense(package3.getId(), LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now().plusDays(1)).note(" License 3-2 ").isDeviceLimited(true).deviceLimit(2L).build());
+        LicenseEntity license3_2 = packageService.issueLicense(package3.getId(), LicensePostVO.builder().licenseType(LicenseType.SUBSCRIPTION).expiredAt(LocalDate.now().plusDays(1)).note(" License 3-2 ").deviceLimited(true).deviceLimit(2L).build());
         List<LicenseEntity> licenses1 = packageService.getLicenses(package1.getId());
         List<LicenseEntity> licenses2 = packageService.getLicenses(package2.getId());
         List<LicenseEntity> licenses3 = packageService.getLicenses(package3.getId());

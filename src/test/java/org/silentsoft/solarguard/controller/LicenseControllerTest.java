@@ -391,7 +391,7 @@ public class LicenseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isUnprocessableEntity());
         mvc.perform(patch("/api/licenses/{licenseId}", "524")
-                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().isDeviceLimited(true).deviceLimit(0L).build()))
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().deviceLimited(true).deviceLimit(0L).build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isUnprocessableEntity());
 
@@ -399,10 +399,10 @@ public class LicenseControllerTest {
                 .content(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(LicensePatchVO.builder()
                         .licenseType(LicenseType.SUBSCRIPTION)
                         .expiredAt(LocalDate.of(9999, 12, 31))
-                        .isDeviceLimited(true)
+                        .deviceLimited(true)
                         .deviceLimit(5L)
                         .note(" patch ")
-                        .isRevoked(true)
+                        .revoke(true)
                         .build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
@@ -420,7 +420,7 @@ public class LicenseControllerTest {
         });
 
         mvc.perform(patch("/api/licenses/{licenseId}", "524")
-                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().isRevoked(false).build()))
+                .content(new ObjectMapper().writeValueAsString(LicensePatchVO.builder().revoke(false).build()))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
         mvc.perform(get("/api/licenses/{licenseId}", "524")).andExpect(status().isOk()).andDo(result -> {

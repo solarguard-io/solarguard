@@ -20,7 +20,7 @@ public class LicensePostVO {
     private LocalDate expiredAt;
 
     @Schema(nullable = true)
-    private Boolean isDeviceLimited;
+    private Boolean deviceLimited;
 
     @Schema(nullable = true)
     private Long deviceLimit;

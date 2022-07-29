@@ -118,8 +118,8 @@ public class LicenseService {
         if (license.getType() == LicenseType.SUBSCRIPTION && Objects.isNull(license.getExpiredAt())) {
             throw new IllegalArgumentException("Expiration date is required.");
         }
-        if (Objects.nonNull(licensePatchVO.getIsDeviceLimited())) {
-            license.setIsDeviceLimited(licensePatchVO.getIsDeviceLimited());
+        if (Objects.nonNull(licensePatchVO.getDeviceLimited())) {
+            license.setIsDeviceLimited(licensePatchVO.getDeviceLimited());
         }
         if (Objects.nonNull(licensePatchVO.getDeviceLimit())) {
             if (licensePatchVO.getDeviceLimit() <= 0) {
@@ -130,9 +130,9 @@ public class LicenseService {
         if (StringUtils.hasText(licensePatchVO.getNote())) {
             license.setNote(licensePatchVO.getNote().trim());
         }
-        if (Objects.nonNull(licensePatchVO.getIsRevoked())) {
-            license.setIsRevoked(licensePatchVO.getIsRevoked());
-            if (licensePatchVO.getIsRevoked()) {
+        if (Objects.nonNull(licensePatchVO.getRevoke())) {
+            license.setIsRevoked(licensePatchVO.getRevoke());
+            if (licensePatchVO.getRevoke()) {
                 license.setRevokedBy(userId);
                 license.setRevokedAt(now);
             } else {
